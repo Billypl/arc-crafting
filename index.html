@@ -120,8 +120,8 @@ button, input, select { font: inherit; color: inherit; }
 .chip .ct { font-size: 10px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
 
 /* tabs */
-.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); overflow-x: auto; }
-.tab { appearance: none; border: 0; background: none; padding: 10px 14px 12px; cursor: pointer; font-family: var(--f-display); font-size: 15px; font-weight: 600; letter-spacing: .04em; color: var(--muted); border-bottom: 3px solid transparent; margin-bottom: -1px; white-space: nowrap; }
+.tabs { display: flex; gap: 4px; box-shadow: inset 0 -1px 0 var(--line); overflow-x: auto; overflow-y: hidden; }
+.tab { appearance: none; border: 0; background: none; padding: 10px 14px 12px; cursor: pointer; font-family: var(--f-display); font-size: 15px; font-weight: 600; letter-spacing: .04em; color: var(--muted); border-bottom: 3px solid transparent; white-space: nowrap; }
 .tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
 .tab .n { font-family: var(--f-mono); font-weight: 400; font-size: 12px; margin-left: 6px; padding: 1px 6px; border-radius: 10px; background: var(--sunk); }
 .panel { padding-block: 20px 60px; display: grid; gap: 22px; }
@@ -229,12 +229,18 @@ svg.dim .elab.hl { opacity: 1; }
 .mn text { font: 500 11px var(--f-body); fill: var(--ink); paint-order: stroke; stroke: var(--surface); stroke-width: 3px; stroke-linejoin: round; display: none; pointer-events: none; }
 .mn.big text, svg.zin .mn text { display: block; }
 .mhd { font-size: 12px; }
-svg.dim .mn:not(.hl) { opacity: .15; }
-svg.dim .mn:not(.hl) text { display: none; }
-svg.dim .mn.hl text { display: block; }
-svg.dim .me:not(.hl) { stroke-opacity: .05; }
+svg.dim .mn:not(.hl):not(.hv) { opacity: .15; }
+svg.dim .mn:not(.hl):not(.hv) text { display: none; }
+svg.dim .mn.hl text, svg.dim .mn.hv text { display: block; }
+svg.dim .me:not(.hl):not(.hv) { stroke-opacity: .05; }
 svg.dim .me.hl { stroke: var(--accent); stroke-opacity: .85; stroke-width: 1.6; }
 svg.dim .me.recycling.hl { stroke: var(--base); }
+/* hover while something is pinned: a second, orange chain on top of the pinned one */
+svg.dim .me.hv { stroke: var(--raid); stroke-opacity: .9; stroke-width: 1.6; stroke-dasharray: none; }
+.mn.hv:not(.pin) circle { stroke: var(--raid); stroke-width: 2; }
+.mn.hvo:not(.pin) circle { stroke-width: 3; }
+.mn.hvo text { font-weight: 700; }
+.mi-h { font-size: 12px; color: var(--raid); border-top: 1px dashed var(--line); padding-top: 4px; margin-top: 2px; }
 .mn.pin circle { stroke: var(--accent); stroke-width: 3; }
 .mn.pin text { font-weight: 700; font-size: 13px; }
 .minfo { position: absolute; left: 10px; top: 10px; z-index: 2; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 10px 12px; display: grid; gap: 4px; max-width: min(300px, calc(100% - 140px)); box-shadow: 0 6px 20px rgba(0,0,0,.12); }
@@ -258,7 +264,7 @@ svg.dim .me.recycling.hl { stroke: var(--base); }
   </div>
   <div class="fpanel" id="fpanel" hidden>
     <div class="wrap">
-      <div class="fhead"><span class="note">Kliknij kategorię, żeby ją ukryć. Ukryte przedmioty znikają z wyszukiwarki, drzew, rankingu i grafu.</span><button class="btn" id="freset">Pokaż wszystko</button></div>
+      <div class="fhead"><span class="note">Kliknij kategorię, żeby ją ukryć. Ukryte przedmioty znikają z wyszukiwarki, drzew, rankingu i grafu.</span><span class="fchips"><button class="btn" id="fnone">Ukryj wszystko</button><button class="btn" id="freset">Pokaż wszystko</button></span></div>
       <div class="fchips" id="fchips"></div>
     </div>
   </div>
@@ -324,6 +330,7 @@ function renderFilters() {
   $("#fchips").innerHTML = types.map(([t, c]) => `<button class="fchip" data-type="${esc(t)}" aria-pressed="${!hidden.has(t)}">${t === "Other" ? "Inne / bez typu" : esc(t)}<b>${c}</b></button>`).join("");
   $("#fcount").textContent = hidden.size ? `${hidden.size} ukryte` : "";
   $("#freset").hidden = !hidden.size;
+  $("#fnone").hidden = hidden.size === counts.size;
 }
 function filtersChanged() {
   store.set("arc-hidden", [...hidden]); descMemo.clear(); renderFilters(); render();
@@ -336,6 +343,7 @@ $("#fchips").addEventListener("click", e => {
   const t = b.dataset.type; hidden.has(t) ? hidden.delete(t) : hidden.add(t); filtersChanged();
 });
 $("#freset").onclick = () => { hidden.clear(); filtersChanged(); };
+$("#fnone").onclick = () => { for (const n of NAMES) hidden.add(typeOf(n)); filtersChanged(); };
 
 /* ---------- helpers ---------- */
 const rarity = n => (ITEMS[n] && ITEMS[n].rarity || "none").toLowerCase();
@@ -957,7 +965,7 @@ function mapData() {
 function renderMapShell() {
   return `<div class="sec">
     <h2>Mapa wszystkiego</h2>
-    <p class="sub">Wszystkie przedmioty z craftingu naraz. Od lewej są surowce, a w prawo kolejne poziomy craftingu aż do gotowych przedmiotów. Większa kropka oznacza więcej powiązań. Najedź, żeby zobaczyć łańcuch przedmiotu. Kliknij, żeby go przypiąć, a kliknięcie tła zdejmuje przypięcie. Po przybliżeniu pojawiają się wszystkie nazwy.</p>
+    <p class="sub">Wszystkie przedmioty z craftingu naraz. Od lewej są surowce, a w prawo kolejne poziomy craftingu aż do gotowych przedmiotów. Większa kropka oznacza więcej powiązań. Najedź, żeby zobaczyć łańcuch przedmiotu. Kliknij, żeby go przypiąć, a kliknięcie tła zdejmuje przypięcie. Przy przypiętym przedmiocie najechanie na inny pokazuje jego łańcuch na pomarańczowo, a przypięty zostaje. Po przybliżeniu pojawiają się wszystkie nazwy.</p>
     <div class="controls">
       <label class="ctl" for="mrec"><input type="checkbox" id="mrec" ${M.recycle ? "checked" : ""}> pokaż recykling w bazie</label>
       <button class="btn" id="mcur">Pokaż ${esc(cur)}</button>
@@ -1003,44 +1011,59 @@ function drawMap() {
   const pz = panZoom(svg, vp, bb, {
     sel: ".mn", maxK: 6,
     onZoom: k => svg.classList.toggle("zin", k > 1.6),
-    onTap: el => { mapPin = el ? el.dataset.id : null; show(mapPin); }
+    onTap: el => { mapPin = el ? el.dataset.id : null; raise(mapPin); paint(); }
   });
   const reach = (start, nb) => { const seen = new Set([start]), st = [start]; while (st.length) for (const x of nb.get(st.pop()) || []) if (!seen.has(x)) { seen.add(x); st.push(x); } return seen; };
-  const info = (id, nUp, nDown) => {
+  const chainInfo = id => `składa się z ${reach(id, m.preds).size - 1} · trafia do ${reach(id, m.succs).size - 1}`;
+  const info = (id, sec) => {
     const box = $("#minfo");
     if (!id) { box.hidden = true; return; }
     const it = ITEMS[id] || {};
     box.innerHTML = `<div class="mi-n"><span class="dot rar-${rarity(id)}"></span><b>${esc(id)}</b></div>
       <div class="mi-f">${esc(it.type || "")}${it.rarity ? ` · ${esc(it.rarity)}` : ""}</div>
-      <div class="mi-f">składa się z ${nUp} · trafia do ${nDown}</div>
-      ${id === cur ? `<div class="mi-f">to aktualny przedmiot</div>` : `<button class="btn" id="mopen">Otwórz ${esc(id)}</button>`}`;
+      <div class="mi-f">${chainInfo(id)}</div>
+      ${id === cur ? `<div class="mi-f">to aktualny przedmiot</div>` : `<button class="btn" id="mopen">Otwórz ${esc(id)}</button>`}
+      ${sec ? `<div class="mi-h"><b>${esc(sec)}</b>: ${chainInfo(sec)}</div>` : ""}`;
     box.hidden = false;
     const o = $("#mopen"); if (o) o.onclick = () => go(id);
   };
-  function show(id) {
-    svg.querySelectorAll(".hl,.pin").forEach(el => el.classList.remove("hl", "pin"));
-    if (!id || !m.nodes.has(id)) { svg.classList.remove("dim"); info(null); return; }
+  // Pin = clicked item (teal chain, stays). Hover = item under the mouse: teal when nothing is pinned,
+  // orange on top of the pinned chain otherwise.
+  let hover = null;
+  const mark = (id, cls) => {
     const up = reach(id, m.preds), down = reach(id, m.succs);
-    svg.classList.add("dim");
-    for (const x of [...up, ...down]) byId.get(x).classList.add("hl");
-    byId.get(id).classList.add("pin");
+    for (const x of [...up, ...down]) byId.get(x).classList.add(cls);
     for (const el of edgeEls) {
       const a = el.dataset.a, b = el.dataset.b;
-      if ((up.has(a) && up.has(b)) || (down.has(a) && down.has(b)) || (el.classList.contains("recycling") && (a === id || b === id))) el.classList.add("hl");
+      if ((up.has(a) && up.has(b)) || (down.has(a) && down.has(b)) || (el.classList.contains("recycling") && (a === id || b === id))) el.classList.add(cls);
     }
-    byId.get(id).parentNode.appendChild(byId.get(id));
-    info(id, up.size - 1, down.size - 1);
+  };
+  const raise = id => { const el = id && byId.get(id); if (el) el.parentNode.appendChild(el); };
+  function paint() {
+    svg.querySelectorAll(".hl,.hv,.pin,.hvo").forEach(el => el.classList.remove("hl", "hv", "pin", "hvo"));
+    const pin = mapPin && m.nodes.has(mapPin) ? mapPin : null;
+    const main = pin || hover;
+    svg.classList.toggle("dim", !!main);
+    if (!main) { info(null); return; }
+    mark(main, "hl");
+    if (pin) byId.get(pin).classList.add("pin");
+    const sec = pin && hover && hover !== pin ? hover : null;
+    if (sec) { mark(sec, "hv"); byId.get(sec).classList.add("hvo"); }
+    info(main, sec);
   }
-  svg.querySelectorAll(".mn").forEach(el => {
-    el.addEventListener("pointerenter", e => { if (e.pointerType === "mouse" && !pz.dragging()) show(el.dataset.id); });
-    el.addEventListener("pointerleave", e => { if (e.pointerType === "mouse") show(mapPin); });
+  // One listener on the whole map (not enter/leave per node): reliable even after drags and pointer capture.
+  svg.addEventListener("pointermove", e => {
+    if (e.pointerType !== "mouse" || e.buttons) return;
+    const el = e.target.closest && e.target.closest(".mn"), id = el ? el.dataset.id : null;
+    if (id !== hover) { hover = id; paint(); }
   });
+  svg.addEventListener("pointerleave", () => { if (hover) { hover = null; paint(); } });
   $("#mcur").onclick = () => {
-    mapPin = cur; show(cur);
+    mapPin = cur; raise(cur); paint();
     const n = m.nodes.get(cur); if (n) pz.center(n.x, n.y, 1.8);
   };
   $("#mcur").hidden = !m.nodes.has(cur);
-  show(mapPin);
+  raise(mapPin); paint();
   const counts = tiers.map(t => `${tierName(t)}: ${m.arr.filter(n => n.tier === t).length}`).join(" · ");
   $("#mlegend").innerHTML = `<span>${m.arr.length} przedmiotów, ${m.links.length} powiązań${hidden.size ? `, ukryte kategorie: ${[...hidden].map(esc).join(", ")}` : ""}</span><span>${counts}</span>${M.recycle ? `<span><svg width="28" height="8" aria-hidden="true"><path class="e recycling" d="M0 4H28"></path></svg> recykling w bazie</span>` : ""}`;
 }

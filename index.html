@@ -247,6 +247,23 @@ svg.dim .me.hv { stroke: var(--raid); stroke-opacity: .9; stroke-width: 1.6; str
 .mi-n { display: flex; gap: 8px; align-items: center; font-family: var(--f-display); font-size: 15px; }
 .mi-f { font-size: 12px; color: var(--muted); }
 .minfo .btn { margin-top: 4px; justify-self: start; }
+/* calculator */
+.facts .btn { padding: 2px 9px; font-size: 13px; }
+.csearch { flex: 0 1 380px; }
+.csearch input { font-size: 15px; padding-block: 7px; }
+.cgrid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); align-items: start; }
+.cqty { display: inline-flex; align-items: center; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; background: var(--surface); }
+.cqty button { border: 0; background: none; width: 28px; padding: 4px 0; cursor: pointer; color: var(--muted); font-family: var(--f-mono); }
+.cqty button:hover { background: var(--accent-soft); color: var(--ink); }
+.cqty input { width: 56px; border: 0; border-inline: 1px solid var(--line); padding: 4px 6px; text-align: right; font-family: var(--f-mono); background: var(--sunk); -moz-appearance: textfield; }
+.cqty input::-webkit-inner-spin-button, .cqty input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.btn.sm { padding: 2px 8px; font-size: 12px; color: var(--muted); }
+.btn.sm:hover { color: var(--ink); }
+td.act { width: 1%; white-space: nowrap; text-align: right; }
+tfoot td { background: var(--sunk); color: var(--muted); font-size: 13px; border-top: 1px solid var(--line); border-bottom: 0; }
+tfoot td b { font-family: var(--f-mono); font-weight: 500; color: var(--ink); }
+.surplus { font-size: 12px; color: var(--muted); }
+.kept { font-size: 11px; color: var(--muted); border: 1px dashed var(--line); border-radius: 3px; padding: 0 5px; margin-left: 6px; }
 @media (prefers-reduced-motion: reduce) { .tw { transition: none; } .e, .n, .elab { transition: none; } }
 @media (max-width: 560px) { .search kbd { display: none; } .tab { padding-inline: 10px; font-size: 14px; } }
 </style>
@@ -277,6 +294,7 @@ svg.dim .me.hv { stroke: var(--raid); stroke-opacity: .9; stroke-width: 1.6; str
     <button class="tab" role="tab" id="tab-src" data-tab="sources" aria-selected="false">Jak zdobyć<span class="n" id="n-src">–</span></button>
     <button class="tab" role="tab" id="tab-graph" data-tab="graph" aria-selected="false">Graf</button>
     <button class="tab" role="tab" id="tab-map" data-tab="map" aria-selected="false">Mapa wszystkiego</button>
+    <button class="tab" role="tab" id="tab-calc" data-tab="calc" aria-selected="false">Kalkulator<span class="n" id="n-calc">–</span></button>
   </nav>
   <section class="panel" id="panel"></section>
 </main>
@@ -298,13 +316,35 @@ const store = {
 let D, ITEMS = {}, byOut = new Map(), byIn = new Map(), recTo = new Map(), recFrom = new Map(),
     ups = new Map(), projs = new Map(), quests = new Map(), NAMES = [], SLUG = new Map();
 let cur = null, tab = "uses";
-const opt = Object.assign({ recycling: true, salvaging: true, depth: 2, sort: "per", best: true }, store.get("arc-opt", {}));
+const opt = Object.assign({ recycling: true, salvaging: true, depth: 2, sort: "per", best: true, raid: false }, store.get("arc-opt", {}));
 let showAll = false, treeFilter = "";
 const hidden = new Set(store.get("arc-hidden", []));
 const typeOf = n => (ITEMS[n] && ITEMS[n].type) || "Other";
 const vis = n => n === cur || !hidden.has(typeOf(n));
 
 const push = (m, k, v) => { let a = m.get(k); if (!a) m.set(k, a = []); a.push(v); };
+// Kilka przepisów na jeden przedmiot to dziś tylko wersja „w rajdzie”: craft z ekwipunku dzięki umiejętności,
+// pomijający krok pośredni (Herbal Bandage: 14 Fabric zamiast Durable Cloth). Domyślnie liczymy przepis ze stołu,
+// opt.raid przełącza na wersję z ekwipunku. Drzewo i podsumowanie dalej pokazują oba przepisy obok siebie.
+const isRaid = r => r.stations.length === 1 && r.stations[0] === "Inventory";
+function recipe(n) {
+  const rs = byOut.get(n);
+  if (!rs) return null;
+  return rs.length === 1 ? rs[0] : (rs.find(r => isRaid(r) === !!opt.raid) || rs[0]);
+}
+// Umiejętność z przepisu „w rajdzie” wśród składników (dowolnie głęboko) przedmiotów z listy; null, gdy nie ma wyboru.
+function altSkill(names) {
+  const seen = new Set(), st = [...names];
+  while (st.length) {
+    const n = st.pop(); if (seen.has(n)) continue; seen.add(n);
+    const rs = byOut.get(n) || [];
+    if (rs.length > 1) { const r = rs.find(isRaid); if (r) return r.skill || "umiejętność"; }
+    for (const r of rs) for (const [m] of r.in) st.push(m);
+  }
+  return null;
+}
+const raidToggle = names => { const sk = altSkill(names); return sk ? `<label class="ctl" for="raid" title="Niektóre przedmioty mają drugi przepis: craft z ekwipunku w trakcie rajdu, wymagający umiejętności ${esc(sk)}."><input type="checkbox" id="raid" ${opt.raid ? "checked" : ""}> przepisy w rajdzie (${esc(sk)})</label>` : ""; };
+const bindRaid = () => { const c = $("#raid"); if (c) c.onchange = () => { opt.raid = c.checked; saveOpt(); renderPanel(); }; };
 
 function init(data) {
   D = data; ITEMS = data.items;
@@ -397,6 +437,7 @@ function renderHead() {
   if (it.value != null) facts.push(`<span>wartość <b>${fmt(it.value)}</b></span>`);
   if (it.weight != null) facts.push(`<span>waga <b>${fmt(it.weight)} kg</b></span>`);
   if (it.stack != null) facts.push(`<span>stos <b>${it.stack}</b></span>`);
+  if (byOut.has(cur)) facts.push(`<button class="btn" id="addcalc">+ do kalkulatora</button>`);
   facts.push(`<a href="https://arcraiders.wiki/wiki/${encodeURIComponent(cur.replace(/ /g, "_"))}" target="_blank" rel="noopener">strona na wiki ↗</a>`);
   const chips = [];
   for (const u of ups.get(cur) || []) chips.push(`<span class="chip k-up"><span class="ct">stół</span>${esc(u.station)} ${u.level}<b>×${u.qty}</b></span>`);
@@ -412,6 +453,8 @@ function renderHead() {
     ${chips.length ? `<div class="needs"><span class="lbl">Nie sprzedawaj, potrzebne do</span>${chips.join("")}</div>` : ""}
     </div>${summaryCard()}`;
   document.title = `${cur} · ARC Raiders Crafting Atlas`;
+  const ac = $("#addcalc");
+  if (ac) ac.onclick = () => { calcAdd(cur, 1); tab = "calc"; store.set("arc-tab", tab); render(); };
 }
 
 /* ---------- summary card ---------- */
@@ -606,7 +649,7 @@ function craftSection() {
   const cards = recs.map((r, i) => {
     const totals = new Map();
     const node = (n, need, path) => {
-      const sub = (byOut.get(n) || [])[0];
+      const sub = recipe(n);
       if (!sub || path.has(n) || path.size > 7) { totals.set(n, (totals.get(n) || 0) + need); return `<li><div class="row"><span class="leafpad"></span><span class="q"><b>${fmt(need)}×</b></span>${link(n)} ${needBadges(n)}</div></li>`; }
       const np = new Set([...path, n]);
       return `<li><details open><summary class="row"><span class="tw">▶</span><span class="q"><b>${fmt(need)}×</b></span>${link(n)} <span class="st">craft: ${sub.stations.map(esc).join(" / ")}${sub.qty > 1 ? `, daje ${sub.qty}` : ""}</span> ${bp(sub)}</summary>
@@ -629,6 +672,7 @@ function renderPanel(mode) {
   if (tab === "uses") { panel.innerHTML = renderUses(mode); bindUses(); }
   else if (tab === "graph") { panel.innerHTML = renderGraphShell(); bindGraph(); }
   else if (tab === "map") { panel.innerHTML = renderMapShell(); bindMap(); }
+  else if (tab === "calc") { panel.innerHTML = renderCalc(); bindCalc(); }
   else {
     const s = renderSources(); panel.innerHTML = s.html; $("#n-src").textContent = s.count;
     panel.querySelectorAll("[data-flag]").forEach(b => b.onclick = () => { opt[b.dataset.flag] = !opt[b.dataset.flag]; saveOpt(); renderPanel(); });
@@ -641,6 +685,7 @@ const saveOpt = () => store.set("arc-opt", opt);
 function render() {
   renderHead();
   $("#n-uses").textContent = desc(cur).size;
+  $("#n-calc").textContent = CALC.list.length || "–";
   if (tab !== "sources") {
     const keep = tab; tab = "sources"; $("#n-src").textContent = renderSources().count; tab = keep;
   }
@@ -648,7 +693,7 @@ function render() {
   renderPanel();
 }
 document.querySelectorAll(".tab").forEach(t => t.onclick = () => { tab = t.dataset.tab; store.set("arc-tab", tab); render(); });
-tab = ["uses", "sources", "graph", "map"].includes(store.get("arc-tab", "uses")) ? store.get("arc-tab", "uses") : "uses";
+tab = ["uses", "sources", "graph", "map", "calc"].includes(store.get("arc-tab", "uses")) ? store.get("arc-tab", "uses") : "uses";
 
 /* ---------- graph ---------- */
 const G = Object.assign({ up: 0, src: 8, craft: true }, store.get("arc-graph", {}));
@@ -692,7 +737,8 @@ function buildGraph() {
   const lid = n => n === cur ? "C" : "L:" + n;
   if (G.craft) {
     const rec = (item, path, d) => {
-      for (const r of byOut.get(item) || []) for (const [m, q] of r.in) {
+      const r = recipe(item);
+      if (r) for (const [m, q] of r.in) {
         if (path.has(m) || !vis(m)) continue;
         node(lid(m), m, "l"); edge(lid(m), lid(item), "craft", q / r.qty);
         if (d < 3) rec(m, new Set([...path, m]), d + 1);
@@ -729,43 +775,63 @@ function layoutGraph(g) {
     vis.delete(id); memo.set(k, best); return best;
   };
   for (const n of g.nodes.values()) n.level = n.side === "c" ? 0 : n.side === "r" ? depth(n.id, preds) : -depth(n.id, succs);
+  // A long edge (skipping columns) gets an invisible waypoint in every column it crosses. Waypoints are ordered
+  // together with the boxes, so the edge gets its own lane between them instead of running through them.
+  const all = new Map(g.nodes), lp = new Map(), ls = new Map();
+  for (const id of all.keys()) { lp.set(id, []); ls.set(id, []); }
+  const link = (a, b) => { ls.get(a).push(b); lp.get(b).push(a); };
+  for (const e of g.edges) {
+    const a = g.nodes.get(e.from), b = g.nodes.get(e.to);
+    let prev = e.from; e.via = [];
+    for (let l = a.level + 1; l < b.level; l++) {
+      const id = `V:${e.from}>${e.to}>${e.kind}@${l}`;
+      all.set(id, { id, name: a.name, level: l, dummy: true }); lp.set(id, []); ls.set(id, []);
+      link(prev, id); e.via.push(id); prev = id;
+    }
+    link(prev, e.to);
+  }
   const layers = new Map();
-  for (const n of g.nodes.values()) push(layers, n.level, n);
+  for (const n of all.values()) push(layers, n.level, n);
   const lv = [...layers.keys()].sort((a, b) => a - b);
-  for (const l of lv) layers.get(l).sort((a, b) => a.name.localeCompare(b.name)).forEach((n, i) => n.ord = i);
+  for (const l of lv) layers.get(l).sort((a, b) => a.name.localeCompare(b.name) || (a.dummy - b.dummy)).forEach((n, i) => n.ord = i);
   const pos = n => n.ord - (layers.get(n.level).length - 1) / 2;
   const sweep = order => {
     for (const l of order) {
       if (l === 0) continue;
       const L = layers.get(l);
       for (const n of L) {
-        const nb = [...preds.get(n.id), ...succs.get(n.id)].map(id => g.nodes.get(id)).filter(m => m.level !== l);
+        const nb = [...lp.get(n.id), ...ls.get(n.id)].map(id => all.get(id)).filter(m => m.level !== l);
         n.bc = nb.length ? nb.reduce((s, m) => s + pos(m), 0) / nb.length : pos(n);
       }
       L.sort((a, b) => a.bc - b.bc).forEach((n, i) => n.ord = i);
     }
   };
   const right = lv.filter(l => l > 0), left = lv.filter(l => l < 0).reverse();
-  for (let i = 0; i < 6; i++) { sweep(i % 2 ? [...right].reverse() : right); sweep(i % 2 ? [...left].reverse() : left); }
+  for (let i = 0; i < 8; i++) { sweep(i % 2 ? [...right].reverse() : right); sweep(i % 2 ? [...left].reverse() : left); }
   // coordinates
   const colW = new Map();
-  for (const l of lv) colW.set(l, Math.max(...layers.get(l).map(n => (n.w = textW(n.name, l === 0) + (l === 0 ? 40 : 34)))));
+  for (const l of lv) colW.set(l, Math.max(0, ...layers.get(l).filter(n => !n.dummy).map(n => (n.w = textW(n.name, l === 0) + (l === 0 ? 40 : 34)))));
   const colX = new Map([[0, -colW.get(0) / 2]]);
   let x = colX.get(0) + colW.get(0);
   for (const l of right) { x += CGAP; colX.set(l, x); x += colW.get(l); }
   x = colX.get(0);
   for (const l of left) { x -= CGAP + colW.get(l); colX.set(l, x); }
+  const LANE = 12;
   for (const l of lv) {
     const L = layers.get(l), W = colW.get(l);
     for (const n of L) {
+      if (n.dummy) { n.x = colX.get(l); n.w = W; n.h = 0; continue; }
       n.w = l === 0 ? W : n.w;
       n.x = l < 0 ? colX.get(l) + W - n.w : colX.get(l);
       n.h = l === 0 ? 36 : NODE_H;
-      n.y = pos(n) * (NODE_H + VGAP) - n.h / 2;
     }
+    // boxes take a full slot, waypoints only a narrow lane
+    const slot = n => n.dummy ? LANE : n.h + VGAP;
+    let y = -L.reduce((s, n) => s + slot(n), 0) / 2;
+    for (const n of L) { n.y = n.dummy ? y + LANE / 2 : y + VGAP / 2; y += slot(n); }
   }
   const tops = new Map(lv.map(l => [l, Math.min(...layers.get(l).map(n => n.y))]));
-  return { preds, succs, layers, lv, colX, colW, tops };
+  return { preds, succs, layers, lv, colX, colW, tops, all };
 }
 function renderGraphShell() {
   const seg = (name, vals) => `<span class="seg">${vals.map(([v, l]) => `<button data-g="${name}" data-val="${v}" aria-pressed="${String(G[name]) === String(v)}">${l}</button>`).join("")}</span>`;
@@ -777,6 +843,7 @@ function renderGraphShell() {
       <span class="ctl">Zastosowania ${seg("up", [[0, "auto"], ...Array.from({ length: Math.min(full, 5) }, (_, i) => [i + 1, String(i + 1)]), ...(full > 5 ? [[full, "wszystkie"]] : [])])}</span>
       <span class="ctl">Najlepsze źródła z recyklingu ${seg("src", [[0, "0"], [5, "5"], [8, "8"], [15, "15"], [30, "30"]])}</span>
       <label class="ctl" for="gcraft"><input type="checkbox" id="gcraft" ${G.craft ? "checked" : ""}> składniki craftingu</label>
+      ${G.craft ? raidToggle([cur]) : ""}
     </div>
     <div class="card gwrap" id="gwrap">
       <div class="gtools"><button class="btn" id="gzi" aria-label="Przybliż">+</button><button class="btn" id="gzo" aria-label="Oddal">−</button><button class="btn w" id="gfit">Dopasuj</button></div>
@@ -788,6 +855,7 @@ function renderGraphShell() {
 function bindGraph() {
   $("#panel").querySelectorAll("[data-g]").forEach(b => b.onclick = () => { G[b.dataset.g] = +b.dataset.val; store.set("arc-graph", G); renderPanel(); });
   $("#gcraft").onchange = e => { G.craft = e.target.checked; store.set("arc-graph", G); renderPanel(); };
+  bindRaid();
   (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(drawGraph);
 }
 function drawGraph() {
@@ -800,17 +868,30 @@ function drawGraph() {
     const x = L.colX.get(l) + (l < 0 ? L.colW.get(l) : 0);
     s += `<text class="ghd" x="${x}" y="${L.tops.get(l) - 12}" text-anchor="${l < 0 ? "end" : "start"}">${l < 0 ? `${-l}. krok wstecz` : `${l}. poziom`}</text>`;
   }
+  const A = L.all, cy = n => n.y + n.h / 2;
+  const ins = new Map(), outs = new Map();
+  for (const e of g.edges) { push(outs, e.from, e); push(ins, e.to, e); }
+  const first = e => A.get(e.via.length ? e.via[0] : e.to), last = e => A.get(e.via.length ? e.via[e.via.length - 1] : e.from);
+  // ports: edges leaving or entering one box are spread over its height (in the order of where they go),
+  // so they neither start from one point nor stack their arrowheads
+  const spread = (n, list, other, key) => {
+    list.sort((p, q) => cy(other(p)) - cy(other(q)));
+    const k = list.length, span = Math.min(n.h - 10, (k - 1) * 6);
+    list.forEach((e, i) => e[key] = cy(n) + (k > 1 ? span * (i / (k - 1) - .5) : 0));
+  };
+  for (const [id, list] of outs) spread(g.nodes.get(id), list, first, "y1");
+  for (const [id, list] of ins) spread(g.nodes.get(id), list, last, "y2");
+  const curve = (x1, y1, x2, y2) => { const dx = Math.max(30, (x2 - x1) / 2); return `C${x1 + dx} ${y1} ${x2 - dx} ${y2} ${x2} ${y2}`; };
   g.edges.forEach((e, i) => {
     const a = g.nodes.get(e.from), b = g.nodes.get(e.to);
-    const x1 = a.x + a.w, y1 = a.y + a.h / 2, x2 = b.x - 2, y2 = b.y + b.h / 2, dx = Math.max(30, (x2 - x1) / 2);
-    e.i = i;
-    s += `<path class="e ${e.kind}" data-e="${i}" d="M${x1} ${y1}C${x1 + dx} ${y1} ${x2 - dx} ${y2} ${x2} ${y2}" marker-end="url(#mk-${e.kind})"></path>`;
+    let x = a.x + a.w, y = e.y1, d = `M${x} ${y}`;
+    for (const v of e.via.map(id => A.get(id))) { d += curve(x, y, v.x, v.y) + `L${v.x + v.w} ${v.y}`; x = v.x + v.w; y = v.y; }
+    const x2 = b.x - 2, y2 = e.y2;
+    d += curve(x, y, x2, y2);
+    e.i = i; e.lx = (x + x2) / 2; e.ly = (y + y2) / 2;
+    s += `<path class="e ${e.kind}" data-e="${i}" d="${d}" marker-end="url(#mk-${e.kind})"></path>`;
   });
-  g.edges.forEach((e, i) => {
-    const a = g.nodes.get(e.from), b = g.nodes.get(e.to);
-    const mx = (a.x + a.w + b.x) / 2, my = (a.y + a.h / 2 + b.y + b.h / 2) / 2;
-    s += `<text class="elab" data-e="${i}" x="${mx}" y="${my + 4}" text-anchor="middle">${fmt(e.qty)}×</text>`;
-  });
+  g.edges.forEach((e, i) => { s += `<text class="elab" data-e="${i}" x="${e.lx}" y="${e.ly + 4}" text-anchor="middle">${fmt(e.qty)}×</text>`; });
   for (const n of nodes) {
     const root = n.side === "c";
     s += `<g class="n${root ? " root" : ""}" data-id="${esc(n.id)}" transform="translate(${n.x} ${n.y})"><title>${esc(n.name)}</title>
@@ -833,7 +914,8 @@ function drawGraph() {
   notes.push(`<span>${nodes.length} przedmiotów, ${g.edges.length} powiązań</span>`);
   $("#glegend").innerHTML = notes.join("");
 
-  const bb = { x0: Math.min(...nodes.map(n => n.x)), x1: Math.max(...nodes.map(n => n.x + n.w)), y0: Math.min(...nodes.map(n => n.y)) - 30, y1: Math.max(...nodes.map(n => n.y + n.h)) };
+  const ext = [...L.all.values()];
+  const bb = { x0: Math.min(...nodes.map(n => n.x)), x1: Math.max(...nodes.map(n => n.x + n.w)), y0: Math.min(...ext.map(n => n.y)) - 30, y1: Math.max(...ext.map(n => n.y + n.h)) };
   const pz = panZoom(svg, vp, bb, {
     onTap: el => { if (el && el.dataset.id !== "C") go(g.nodes.get(el.dataset.id).name); }
   });
@@ -1066,6 +1148,116 @@ function drawMap() {
   raise(mapPin); paint();
   const counts = tiers.map(t => `${tierName(t)}: ${m.arr.filter(n => n.tier === t).length}`).join(" · ");
   $("#mlegend").innerHTML = `<span>${m.arr.length} przedmiotów, ${m.links.length} powiązań${hidden.size ? `, ukryte kategorie: ${[...hidden].map(esc).join(", ")}` : ""}</span><span>${counts}</span>${M.recycle ? `<span><svg width="28" height="8" aria-hidden="true"><path class="e recycling" d="M0 4H28"></path></svg> recykling w bazie</span>` : ""}`;
+}
+
+/* ---------- calculator ---------- */
+// list: [nazwa, ile sztuk] do wytworzenia; keep: przedmioty, których nie rozpisujemy (masz je albo kupisz),
+// więc trafiają do surowców jak każdy inny składnik.
+const CALC = Object.assign({ list: [], keep: [] }, store.get("arc-calc", {}));
+const saveCalc = () => store.set("arc-calc", CALC);
+function calcAdd(n, q) {
+  const row = CALC.list.find(x => x[0] === n);
+  if (row) row[1] += q; else CALC.list.push([n, q]);
+  saveCalc();
+}
+// Rozpisuje listę od zera: każdy półprodukt w pełnych craftach (przepis dający 3 szt. przy potrzebie 4 to 2 crafty).
+// Przedmioty idą od wyników w dół (porządek topologiczny), więc zapotrzebowanie na półprodukt jest już pełne,
+// zanim policzymy jego crafty.
+function calcRun() {
+  const keep = new Set(CALC.keep);
+  const rec = n => keep.has(n) ? null : recipe(n);
+  const order = [], state = new Map();
+  const visit = n => {
+    if (state.has(n)) return;
+    state.set(n, 1);
+    const r = rec(n); if (r) for (const [m] of r.in) visit(m);
+    order.push(n);
+  };
+  for (const [n] of CALC.list) visit(n);
+  order.reverse();
+  const need = new Map();
+  for (const [n, q] of CALC.list) need.set(n, (need.get(n) || 0) + q);
+  const crafts = [], raw = [];
+  for (const n of order) {
+    const q = need.get(n); if (!q) continue;
+    const r = rec(n);
+    if (!r) { raw.push([n, q]); continue; }
+    const k = Math.ceil(q / r.qty - 1e-9);
+    crafts.push({ n, need: q, k, made: k * r.qty, r });
+    for (const [m, c] of r.in) need.set(m, (need.get(m) || 0) + k * c);
+  }
+  raw.sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+  return { crafts: crafts.reverse(), raw };
+}
+function renderCalc() {
+  const L = CALC.list, keep = new Set(CALC.keep);
+  const canAdd = byOut.has(cur) && !L.some(x => x[0] === cur);
+  const controls = `<div class="controls">
+      <div class="search csearch"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path></svg>
+        <input id="cq" type="text" autocomplete="off" spellcheck="false" placeholder="Dodaj przedmiot do wytworzenia…" aria-label="Dodaj przedmiot do kalkulatora">
+        <ul id="csugg" class="sugg" role="listbox" hidden></ul></div>
+      ${canAdd ? `<button class="btn" id="ccur">+ ${esc(cur)}</button>` : ""}
+      ${raidToggle([...L.map(x => x[0])])}
+      ${L.length || keep.size ? `<button class="btn" id="cclear">Wyczyść wszystko</button>` : ""}
+    </div>`;
+  const head = `<h2>Kalkulator craftingu</h2>
+    <p class="sub">Dodaj przedmioty i ile sztuk chcesz mieć. Kalkulator rozpisze, ile razy craftować każdy półprodukt i ile surowców zebrać, licząc od zera. Przepis dający kilka sztuk naraz liczy się w pełnych craftach. Ulepszenia broni obejmują poprzednie poziomy, więc Tempest IV zawiera też koszt Tempest I–III.</p>`;
+  if (!L.length) return `<div class="sec">${head}${controls}<div class="card empty">Lista jest pusta. Wyszukaj przedmiot powyżej albo otwórz go i kliknij „+ do kalkulatora”.</div></div>`;
+  const { crafts, raw } = calcRun();
+  const targets = `<div class="card"><div class="recipe-h"><span class="ttl">Chcę wytworzyć</span></div><div class="tblwrap"><table>
+    <thead><tr><th>Przedmiot</th><th>Ile sztuk</th><th>Stół</th><th></th></tr></thead><tbody>
+    ${L.map(([n, q], i) => { const r = recipe(n); return `<tr><td>${link(n)} ${r ? bp(r) : ""}</td>
+      <td><span class="cqty"><button data-step="${i}" data-d="-1" aria-label="Mniej">−</button><input type="number" min="1" step="1" value="${q}" data-qty="${i}" aria-label="Ile sztuk ${esc(n)}"><button data-step="${i}" data-d="1" aria-label="Więcej">+</button></span></td>
+      <td>${r ? stations(r) : ""}</td><td class="act"><button class="btn sm" data-del="${i}" aria-label="Usuń ${esc(n)}">usuń</button></td></tr>`; }).join("")}
+    </tbody></table></div></div>`;
+  let wt = 0, val = 0, wOk = true, vOk = true;
+  for (const [n, q] of raw) { const it = ITEMS[n] || {}; if (it.weight == null) wOk = false; else wt += it.weight * q; if (it.value == null) vOk = false; else val += it.value * q; }
+  const rawT = `<div class="card"><div class="recipe-h"><span class="ttl">Surowce do zebrania</span><span class="note">${raw.length} rodzajów</span></div><div class="tblwrap"><table>
+    <thead><tr><th class="num">Ile</th><th>Przedmiot</th><th class="num">Waga</th><th></th></tr></thead><tbody>
+    ${raw.map(([n, q]) => { const it = ITEMS[n] || {}; return `<tr><td class="num"><b>${fmt(q)}×</b></td><td>${link(n)}${keep.has(n) ? `<span class="kept">masz / kupisz</span>` : ""} ${needBadges(n)}</td>
+      <td class="num">${it.weight != null ? fmt(it.weight * q) + " kg" : "—"}</td>
+      <td class="act">${keep.has(n) ? `<button class="btn sm" data-unkeep="${esc(n)}">rozpisz</button>` : ""}</td></tr>`; }).join("")}
+    </tbody><tfoot><tr><td colspan="4">razem waga <b>${wOk ? "" : "≥ "}${fmt(wt)} kg</b> · wartość surowców <b>${vOk ? "" : "≥ "}${fmt(val)}</b></td></tr></tfoot></table></div></div>`;
+  const craftT = `<div class="card"><div class="recipe-h"><span class="ttl">Kolejność craftowania</span><span class="note">od składników do gotowych przedmiotów</span></div><div class="tblwrap"><table>
+    <thead><tr><th class="num">Craftów</th><th>Przedmiot</th><th>Stół</th><th></th></tr></thead><tbody>
+    ${crafts.map(c => `<tr><td class="num"><b>${c.k}×</b></td><td>${link(c.n)} ${bp(c.r)}${c.made > c.need ? `<div class="surplus">daje ${c.made} szt., potrzeba ${fmt(c.need)} (+${fmt(c.made - c.need)} zapasu)</div>` : c.r.qty > 1 ? `<div class="surplus">daje ${c.made} szt.</div>` : ""}</td>
+      <td>${stations(c.r)}</td>
+      <td class="act"><button class="btn sm" data-keep="${esc(c.n)}" title="Nie rozpisuj: potraktuj jako surowiec, bo już go masz albo kupisz">mam</button></td></tr>`).join("")}
+    </tbody></table></div></div>`;
+  return `<div class="sec">${head}${controls}<div style="display:grid;gap:16px">${targets}<div class="cgrid">${rawT}${craftT}</div></div></div>`;
+}
+function bindCalc() {
+  const P = $("#panel"), again = () => { saveCalc(); render(); };
+  bindRaid();
+  const cc = $("#ccur"); if (cc) cc.onclick = () => { calcAdd(cur, 1); again(); };
+  const cl = $("#cclear"); if (cl) cl.onclick = () => { CALC.list = []; CALC.keep = []; again(); };
+  P.querySelectorAll("[data-step]").forEach(b => b.onclick = () => { const row = CALC.list[+b.dataset.step]; row[1] = Math.max(1, row[1] + +b.dataset.d); again(); });
+  P.querySelectorAll("[data-qty]").forEach(inp => inp.onchange = () => { const v = Math.round(+inp.value); if (v >= 1) CALC.list[+inp.dataset.qty][1] = v; again(); });
+  P.querySelectorAll("[data-del]").forEach(b => b.onclick = () => { CALC.list.splice(+b.dataset.del, 1); again(); });
+  P.querySelectorAll("[data-keep]").forEach(b => b.onclick = () => { CALC.keep.push(b.dataset.keep); again(); });
+  P.querySelectorAll("[data-unkeep]").forEach(b => b.onclick = () => { CALC.keep = CALC.keep.filter(n => n !== b.dataset.unkeep); again(); });
+  // wyszukiwarka tylko wśród przedmiotów, które da się wytworzyć
+  const inp = $("#cq"), ul = $("#csugg"); let hs = [], act = 0;
+  const paint = () => ul.querySelectorAll("li").forEach((li, i) => li.setAttribute("aria-selected", String(i === act)));
+  const show = () => {
+    const t = inp.value.trim().toLowerCase();
+    if (!t) { ul.hidden = true; return; }
+    hs = [...byOut.keys()].map(n => [n, score(n, t)]).filter(x => x[1] >= 0).sort((a, b) => a[1] - b[1] || a[0].localeCompare(b[0])).slice(0, 12).map(x => x[0]);
+    act = 0;
+    ul.innerHTML = hs.length ? hs.map((n, i) => `<li role="option" data-n="${esc(n)}" aria-selected="${i === 0}"><span class="dot rar-${rarity(n)}"></span><span>${markText(n, t)}</span><span class="t">${esc(typeOf(n))}</span></li>`).join("")
+      : `<li aria-disabled="true"><span class="t" style="margin:0">Nic do wytworzenia nie pasuje do „${esc(inp.value)}”.</span></li>`;
+    ul.hidden = false;
+  };
+  const choose = n => { calcAdd(n, 1); saveCalc(); render(); const i = $("#cq"); if (i) i.focus(); };
+  inp.addEventListener("input", show);
+  inp.addEventListener("keydown", e => {
+    if (e.key === "Escape") { ul.hidden = true; return; }
+    if (ul.hidden || !hs.length) return;
+    if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); act = (act + (e.key === "ArrowDown" ? 1 : -1) + hs.length) % hs.length; paint(); }
+    else if (e.key === "Enter") { e.preventDefault(); choose(hs[act]); }
+  });
+  inp.addEventListener("blur", () => setTimeout(() => { ul.hidden = true; }, 120));
+  ul.addEventListener("mousedown", e => { const li = e.target.closest("li[data-n]"); if (li) { e.preventDefault(); choose(li.dataset.n); } });
 }
 
 /* ---------- search ---------- */

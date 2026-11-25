@@ -1,0 +1,208 @@
+#!/usr/bin/env python3
+"""Pobiera dane craftingu i recyklingu z ARC Raiders Wiki (Cargo API) do data.json.
+
+Użycie:  python3 fetch_data.py [ścieżka_wyjściowa]   (domyślnie: data.json obok skryptu)
+Uruchom ponownie po aktualizacji wiki, żeby odświeżyć dane.
+"""
+import html
+import json
+import re
+import sys
+import time
+import urllib.parse
+import urllib.request
+from datetime import datetime, timezone
+from pathlib import Path
+
+API = "https://arcraiders.wiki/w/api.php"
+UA = "arc-crafting-graph/1.0 (personal crafting helper)"
+PAGE = 500
+
+
+def cargo(table, fields, where=None):
+    """Zwraca wszystkie wiersze tabeli Cargo (z paginacją)."""
+    rows, offset = [], 0
+    while True:
+        params = {
+            "action": "cargoquery", "format": "json", "tables": table,
+            "fields": fields, "limit": PAGE, "offset": offset,
+        }
+        if where:
+            params["where"] = where
+        url = API + "?" + urllib.parse.urlencode(params)
+        req = urllib.request.Request(url, headers={"User-Agent": UA})
+        with urllib.request.urlopen(req, timeout=60) as r:
+            data = json.load(r)
+        if "error" in data:
+            raise RuntimeError(f"{table}: {data['error']}")
+        batch = [{k: html.unescape(v) if isinstance(v, str) else v
+                  for k, v in row["title"].items()} for row in data["cargoquery"]]
+        rows += batch
+        if len(batch) < PAGE:
+            return rows
+        offset += PAGE
+        time.sleep(0.5)
+
+
+def category_members(cat):
+    """Tytuły stron (przestrzeń główna) w kategorii wiki."""
+    out, cont = [], {}
+    while True:
+        params = {"action": "query", "format": "json", "list": "categorymembers",
+                  "cmtitle": cat, "cmnamespace": 0, "cmlimit": 500, **cont}
+        req = urllib.request.Request(API + "?" + urllib.parse.urlencode(params), headers={"User-Agent": UA})
+        with urllib.request.urlopen(req, timeout=60) as r:
+            data = json.load(r)
+        out += [m["title"] for m in data.get("query", {}).get("categorymembers", [])]
+        if "continue" not in data:
+            return out
+        cont = data["continue"]
+
+
+def num(v, cast=int, default=None):
+    try:
+        return cast(v)
+    except (TypeError, ValueError):
+        return default
+
+
+ROMAN = {"I": "1", "II": "2", "III": "3", "IV": "4", "V": "5"}
+
+
+def norm_station(s):
+    s = s.strip()
+    if not s:
+        return None
+    m = re.match(r"^(.*?)\s+([IV]+)$", s)
+    if m and m.group(2) in ROMAN:
+        s = f"{m.group(1)} {ROMAN[m.group(2)]}"
+    if s == "Workbench":
+        s = "Workbench 1"
+    return s
+
+
+def parse_ingredients(s):
+    out = []
+    for part in (s or "").split(","):
+        part = part.strip()
+        if not part:
+            continue
+        name, _, qty = part.rpartition(":")
+        if not name:
+            name, qty = qty, "1"
+        # Ulepszenia broni mają wpisy typu "Anvil I:1:1" – odcinamy resztki ":N" z nazwy.
+        name = re.sub(r"(:\d+)+$", "", name.strip())
+        out.append([name, num(qty, default=1)])
+    return out
+
+
+def main():
+    out_path = Path(sys.argv[1]) if len(sys.argv) > 1 else Path(__file__).with_name("data.json")
+
+    print("items…")
+    items = {}
+    for r in cargo("items", "name,rarity,type,sellprice,weight,stacksize,raritysort"):
+        if not r.get("name"):
+            continue
+        items[r["name"]] = {
+            "rarity": r.get("rarity") or None,
+            "type": r.get("type") or None,
+            "value": num(r.get("sellprice")),
+            "weight": num(r.get("weight"), float),
+            "stack": num(r.get("stacksize")),
+        }
+
+    print("crafting…")
+    merged = {}
+    for r in cargo("crafting", "resultItem,resultQty,ingredients,requireBlueprint,requireStation,requireSkill"):
+        res = r.get("resultItem")
+        if not res:
+            continue
+        ins = parse_ingredients(r.get("ingredients"))
+        if not ins:
+            continue
+        qty = num(r.get("resultQty"), default=1) or 1
+        stations = [s for s in (norm_station(x) for x in (r.get("requireStation") or "").split(",")) if s]
+        key = (res, qty, json.dumps(sorted(ins)))
+        rec = merged.setdefault(key, {"out": res, "qty": qty, "in": ins, "stations": [],
+                                      "blueprint": r.get("requireBlueprint") or None,
+                                      "skill": r.get("requireSkill") or None})
+        for s in stations:
+            if s not in rec["stations"]:
+                rec["stations"].append(s)
+    recipes = list(merged.values())
+
+    print("recycling…")
+    recycle = {}
+    for r in cargo("recycling", "recipeType,inputItem,outputItem,outputQty"):
+        if not (r.get("inputItem") and r.get("outputItem")):
+            continue
+        k = (r.get("recipeType") or "recycling", r["inputItem"])
+        recycle.setdefault(k, []).append([r["outputItem"], num(r.get("outputQty"), default=1)])
+    recycle = [{"type": t, "in": i, "out": o} for (t, i), o in sorted(recycle.items())]
+
+    print("workshop upgrades…")
+    upgrades = [{"station": r.get("station"), "level": num(r.get("stationLevel")),
+                 "item": r.get("itemName"), "qty": num(r.get("qty"), default=1)}
+                for r in cargo("workshopUpgrades", "station,stationLevel,itemName,qty") if r.get("itemName")]
+
+    print("projects…")
+    projects = [{"project": r.get("projectName"), "stage": num(r.get("stage")),
+                 "item": r.get("itemName"), "qty": num(r.get("qty"), default=1)}
+                for r in cargo("projectItems", "projectName,stage,context,itemName,qty", where="context='require'")
+                if r.get("itemName")]
+
+    print("quests…")
+    quests = [{"quest": r.get("quest"), "item": r.get("itemName"), "qty": num(r.get("qty"), default=1)}
+              for r in cargo("questItems", "_pageName=quest,context,itemName,qty", where="context='require'")
+              if r.get("itemName")]
+
+    # Wpisy z podstron (np. "Użytkownik/Tabela") to brudnopisy, nie prawdziwe przedmioty.
+    junk = lambda n: "/" in (n or "")
+    recipes = [r for r in recipes if not junk(r["out"]) and not any(junk(n) for n, _ in r["in"])]
+    recycle = [r for r in recycle if not junk(r["in"])]
+
+    # Bronie nie mają wpisów w tabeli items: rozpoznajemy je po kategorii wiki (z rzadkością).
+    print("weapons…")
+    weapon_rarity = {w: None for w in category_members("Category:Weapons")}
+    for rar in ("Common", "Uncommon", "Rare", "Epic", "Legendary", "Amplified"):
+        for w in category_members(f"Category:{rar} Weapons"):
+            weapon_rarity[w] = rar
+    used = ({r["out"] for r in recipes} | {n for r in recipes for n, _ in r["in"]} |
+            {r["in"] for r in recycle} | {o for r in recycle for o, _ in r["out"]})
+    for n in used - set(items):
+        base = re.sub(r"\s+(I|II|III|IV|V)$", "", n)
+        if base in weapon_rarity:
+            items[n] = {"rarity": weapon_rarity[base], "type": "Weapon", "value": None, "weight": None, "stack": None}
+
+    data = {
+        "source": "https://arcraiders.wiki/",
+        "fetched": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC"),
+        "items": items, "recipes": recipes, "recycle": recycle,
+        "upgrades": upgrades, "projects": projects, "quests": quests,
+    }
+
+    # Jeden rekord na linię: plik da się czytać i porównywać w diffie.
+    lines = ["{"]
+    keys = list(data)
+    for i, k in enumerate(keys):
+        v = data[k]
+        comma = "," if i < len(keys) - 1 else ""
+        if isinstance(v, list):
+            body = ",\n".join("  " + json.dumps(x, ensure_ascii=False) for x in v)
+            lines.append(f'"{k}": [\n{body}\n]{comma}')
+        elif isinstance(v, dict):
+            body = ",\n".join(f"  {json.dumps(n, ensure_ascii=False)}: {json.dumps(x, ensure_ascii=False)}"
+                              for n, x in sorted(v.items()))
+            lines.append(f'"{k}": {{\n{body}\n}}{comma}')
+        else:
+            lines.append(f'"{k}": {json.dumps(v, ensure_ascii=False)}{comma}')
+    lines.append("}")
+    out_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+    print(f"Zapisano {out_path}: {len(items)} przedmiotów, {len(recipes)} przepisów, "
+          f"{len(recycle)} rozbiórek, {len(upgrades)} ulepszeń, {len(projects)} projektów, {len(quests)} questów")
+
+
+if __name__ == "__main__":
+    main()

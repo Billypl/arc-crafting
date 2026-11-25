@@ -1,0 +1,1092 @@
+<title>ARC Raiders Crafting Atlas</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: sticky search bar on top, item dossier header, two tabs (uses tree / sources table) in one reading column up to 1180px. */
+:root {
+  --bg: #eceff2;
+  --surface: #ffffff;
+  --sunk: #f4f6f8;
+  --ink: #18212b;
+  --muted: #5b6774;
+  --line: #d3dae1;
+  --accent: #0b6b74;
+  --accent-soft: #d7eef0;
+  --hl: #fbe7a6;
+  --bar: #9fd3d8;
+  --r-common: #7d8893;
+  --r-uncommon: #2f8f3a;
+  --r-rare: #2370c4;
+  --r-epic: #9440c4;
+  --r-legendary: #c48a0c;
+  --r-amplified: #c43d5f;
+  --base: #0b6b74;
+  --raid: #a8520a;
+  --f-display: "Chakra Petch", "Segoe UI", system-ui, sans-serif;
+  --f-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #11161b; --surface: #181f26; --sunk: #141a20; --ink: #e3e9ee; --muted: #93a0ad; --line: #2a343e;
+  --accent: #4cc3cc; --accent-soft: #163a3e; --hl: #5a4a12; --bar: #1f5a60;
+  --r-common: #9aa5b0; --r-uncommon: #5cc768; --r-rare: #5aa5f0; --r-epic: #c27ef0; --r-legendary: #f0b73a; --r-amplified: #f0708f;
+  --base: #4cc3cc; --raid: #f0a050; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #11161b; --surface: #181f26; --sunk: #141a20; --ink: #e3e9ee; --muted: #93a0ad; --line: #2a343e;
+  --accent: #4cc3cc; --accent-soft: #163a3e; --hl: #5a4a12; --bar: #1f5a60;
+  --r-common: #9aa5b0; --r-uncommon: #5cc768; --r-rare: #5aa5f0; --r-epic: #c27ef0; --r-legendary: #f0b73a; --r-amplified: #f0708f;
+  --base: #4cc3cc; --raid: #f0a050; color-scheme: dark; }
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.45; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 30; background: var(--surface); }
+a { color: var(--accent); }
+button, input, select { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.wrap { max-width: 1180px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+
+/* top bar */
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: var(--surface); border-bottom: 1px solid var(--line); }
+.top .wrap { display: flex; align-items: center; gap: 20px; padding-block: 12px; flex-wrap: wrap; }
+.brand { font-family: var(--f-display); font-weight: 700; font-size: 17px; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; }
+.brand small { display: block; font-family: var(--f-mono); font-weight: 400; font-size: 11px; letter-spacing: 0; text-transform: none; color: var(--muted); }
+.search { position: relative; flex: 1 1 320px; min-width: 0; }
+.search input { width: 100%; padding: 10px 14px 10px 38px; border: 1px solid var(--line); border-radius: 6px; background: var(--sunk); font-size: 16px; }
+.search input:focus { background: var(--surface); border-color: var(--accent); outline: none; box-shadow: 0 0 0 3px var(--accent-soft); }
+.search svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; fill: none; stroke: var(--muted); stroke-width: 2; }
+.search kbd { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-family: var(--f-mono); font-size: 11px; color: var(--muted); border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px; }
+.sugg { position: absolute; left: 0; right: 0; top: calc(100% + 6px); background: var(--surface); border: 1px solid var(--line); border-radius: 6px; box-shadow: 0 10px 30px rgba(0,0,0,.18); list-style: none; margin: 0; padding: 4px; max-height: min(420px, 60vh); overflow-y: auto; }
+.sugg li { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 4px; cursor: pointer; }
+.sugg li[aria-selected="true"], .sugg li:hover { background: var(--accent-soft); }
+.sugg .t { margin-left: auto; font-size: 12px; color: var(--muted); white-space: nowrap; }
+.sugg mark { background: var(--hl); color: inherit; border-radius: 2px; }
+
+/* filters */
+.fbtn { padding: 9px 14px; font-size: 14px; display: inline-flex; gap: 8px; align-items: center; }
+.fbtn[aria-expanded="true"] { border-color: var(--accent); background: var(--accent-soft); }
+.fcount:not(:empty) { font-family: var(--f-mono); font-size: 12px; padding: 0 7px; border-radius: 10px; background: var(--accent); color: var(--surface); }
+.fpanel { border-top: 1px solid var(--line); background: var(--sunk); }
+.fpanel .wrap { padding-block: 12px 14px; display: grid; gap: 10px; }
+.fhead { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; justify-content: space-between; }
+.fchips { display: flex; flex-wrap: wrap; gap: 6px; }
+.fchip { border: 1px solid var(--line); background: var(--surface); border-radius: 4px; padding: 4px 10px; font-size: 13px; cursor: pointer; display: inline-flex; gap: 8px; align-items: center; }
+.fchip b { font-family: var(--f-mono); font-weight: 400; font-size: 12px; color: var(--muted); }
+.fchip::before { content: ""; width: 12px; height: 12px; border-radius: 2px; border: 1.5px solid var(--accent); background: var(--accent); box-shadow: inset 0 0 0 2px var(--surface); }
+.fchip[aria-pressed="false"] { color: var(--muted); text-decoration: line-through; background: transparent; }
+.fchip[aria-pressed="false"]::before { background: transparent; border-color: var(--muted); }
+
+/* rarity */
+.dot { width: 9px; height: 9px; border-radius: 2px; flex: none; display: inline-block; background: var(--r-common); transform: rotate(45deg); }
+.rar-uncommon { --rc: var(--r-uncommon); } .rar-rare { --rc: var(--r-rare); } .rar-epic { --rc: var(--r-epic); }
+.rar-legendary { --rc: var(--r-legendary); } .rar-amplified { --rc: var(--r-amplified); } .rar-common, .rar-none { --rc: var(--r-common); }
+.dot[class*="rar-"] { background: var(--rc); }
+
+/* item header */
+.head { padding-block: 28px 20px; display: grid; gap: 18px; }
+.hinfo { display: grid; gap: 14px; min-width: 0; }
+/* summary band: one column per fact group, equal heights, value lines aligned at the bottom */
+.scard { display: grid; grid-template-columns: minmax(0, 1fr); overflow: hidden; }
+.sc-sec { padding: 14px 18px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.sc-sec + .sc-sec { border-top: 1px solid var(--line); }
+@media (min-width: 760px) {
+  .scard { grid-template-columns: repeat(var(--cols, 1), minmax(0, 1fr)); }
+  .sc-sec + .sc-sec { border-top: 0; border-left: 1px solid var(--line); }
+}
+.scard.slim .sc-sec { padding-block: 12px; }
+.sc-sec h3 { margin: 0; display: flex; align-items: center; gap: 8px; font-family: var(--f-display); font-size: 11px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.sc-r { display: flex; flex-direction: column; gap: 6px; }
+.sc-r + .sc-r { padding-top: 10px; border-top: 1px dashed var(--line); }
+.sc-meta { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: center; font-size: 12px; }
+.ing { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 3px 10px; align-items: baseline; }
+.ing .q { text-align: right; }
+.sc-v { font-size: 12px; color: var(--muted); margin-top: auto; padding-top: 4px; }
+.sc-sec > .sc-r:last-of-type { flex: 1; }
+.sc-r .sc-v { margin-top: auto; }
+.sc-v b { font-family: var(--f-mono); font-weight: 500; color: var(--ink); }
+.sc-v .good, .sc-v .bad { margin-left: 6px; font-weight: 600; }
+.sc-v .good { color: var(--r-uncommon); } .sc-v .bad { color: var(--raid); }
+.sc-none { font-size: 13px; color: var(--muted); }
+.head .kicker { display: flex; gap: 10px; align-items: center; font-family: var(--f-display); font-size: 12px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--rc, var(--muted)); }
+.head h1 { margin: 0; font-family: var(--f-display); font-weight: 700; font-size: clamp(28px, 5vw, 44px); line-height: 1.05; letter-spacing: .01em; text-wrap: balance; }
+.facts { display: flex; flex-wrap: wrap; gap: 6px 22px; color: var(--muted); font-size: 14px; }
+.facts b { color: var(--ink); font-family: var(--f-mono); font-weight: 500; }
+.needs { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.needs .lbl { font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-right: 4px; }
+.chip { display: inline-flex; align-items: center; gap: 6px; padding: 3px 9px; border-radius: 4px; background: var(--sunk); border: 1px solid var(--line); font-size: 13px; white-space: nowrap; }
+.chip b { font-family: var(--f-mono); font-weight: 500; }
+.chip.k-up { border-color: color-mix(in srgb, var(--accent) 40%, var(--line)); }
+.chip .ct { font-size: 10px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+
+/* tabs */
+.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); overflow-x: auto; }
+.tab { appearance: none; border: 0; background: none; padding: 10px 14px 12px; cursor: pointer; font-family: var(--f-display); font-size: 15px; font-weight: 600; letter-spacing: .04em; color: var(--muted); border-bottom: 3px solid transparent; margin-bottom: -1px; white-space: nowrap; }
+.tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
+.tab .n { font-family: var(--f-mono); font-weight: 400; font-size: 12px; margin-left: 6px; padding: 1px 6px; border-radius: 10px; background: var(--sunk); }
+.panel { padding-block: 20px 60px; display: grid; gap: 22px; }
+.panel > * { min-width: 0; }
+.sec h2 { margin: 0 0 4px; font-family: var(--f-display); font-size: 19px; font-weight: 700; letter-spacing: .02em; }
+.sec p.sub { margin: 0 0 12px; color: var(--muted); max-width: 72ch; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; }
+.empty { padding: 18px; color: var(--muted); }
+
+/* controls */
+.controls { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; margin-bottom: 12px; }
+.ctl { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; background: var(--surface); }
+.seg button { border: 0; background: none; padding: 5px 10px; cursor: pointer; font-size: 13px; color: var(--muted); }
+.seg button + button { border-left: 1px solid var(--line); }
+.seg button[aria-pressed="true"] { background: var(--accent-soft); color: var(--ink); font-weight: 600; }
+.ctl input[type="checkbox"] { accent-color: var(--accent); width: 16px; height: 16px; }
+.ctl input[type="search"] { padding: 6px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); width: 220px; max-width: 100%; }
+.btn { border: 1px solid var(--line); background: var(--surface); border-radius: 6px; padding: 5px 10px; font-size: 13px; cursor: pointer; }
+.btn:hover { border-color: var(--accent); }
+
+/* links to items */
+.it { color: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; font-weight: 500; }
+.it:hover .nm { text-decoration: underline; text-decoration-color: var(--accent); text-underline-offset: 3px; }
+.it.cur { color: var(--accent); }
+mark { background: var(--hl); color: inherit; border-radius: 2px; padding: 0 1px; }
+
+/* sources table */
+.tblwrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+th { text-align: left; font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); padding: 10px 12px; border-bottom: 1px solid var(--line); white-space: nowrap; background: var(--sunk); }
+th.num, td.num { text-align: right; }
+th.sorted { color: var(--accent); }
+td { padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+tr:last-child td { border-bottom: 0; }
+tr.top1 td { background: color-mix(in srgb, var(--accent-soft) 55%, transparent); }
+td.rank { font-family: var(--f-mono); color: var(--muted); width: 1%; }
+td.num { font-family: var(--f-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.metric { position: relative; display: inline-block; min-width: 76px; padding: 1px 4px; }
+.metric i { position: absolute; right: 0; top: 0; bottom: 0; background: var(--bar); border-radius: 2px; z-index: 0; }
+.metric span { position: relative; z-index: 1; font-weight: 500; }
+.chain { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; }
+.arrow { display: inline-flex; align-items: center; gap: 4px; font-family: var(--f-mono); font-size: 12px; color: var(--muted); white-space: nowrap; }
+.arrow::after { content: "→"; color: var(--muted); }
+.tg { font-family: var(--f-display); font-size: 10px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; padding: 0 5px; border-radius: 3px; border: 1px solid currentColor; }
+.tg.recycling { color: var(--base); } .tg.salvaging { color: var(--raid); }
+.by { font-size: 12px; color: var(--muted); margin-top: 3px; }
+.warn { font-size: 12px; color: var(--raid); margin-top: 3px; }
+.more { padding: 12px; text-align: center; border-top: 1px solid var(--line); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 12px; color: var(--muted); margin-top: 10px; }
+
+/* trees */
+.tree, .tree ul { list-style: none; margin: 0; padding: 0; }
+.tree ul { margin-left: 14px; padding-left: 14px; border-left: 1px dashed var(--line); }
+.tree { padding: 8px 12px; }
+.tree li { margin: 0; }
+.row { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; padding: 6px 0; }
+details > summary { list-style: none; cursor: pointer; }
+details > summary::-webkit-details-marker { display: none; }
+.tw { width: 14px; flex: none; color: var(--muted); font-size: 11px; display: inline-block; transition: transform .12s; }
+details[open] > summary .tw { transform: rotate(90deg); }
+.leafpad { width: 14px; flex: none; display: inline-block; }
+.q { font-family: var(--f-mono); font-size: 13px; color: var(--muted); white-space: nowrap; }
+.q b { color: var(--ink); font-weight: 500; }
+.st { font-size: 12px; color: var(--muted); white-space: nowrap; }
+.bp { font-size: 11px; color: var(--r-legendary); font-family: var(--f-display); font-weight: 600; letter-spacing: .05em; text-transform: uppercase; }
+.badges { display: inline-flex; gap: 4px; }
+.bd { font-size: 11px; padding: 0 6px; border-radius: 3px; background: var(--sunk); border: 1px solid var(--line); color: var(--muted); white-space: nowrap; }
+.totals { display: flex; flex-wrap: wrap; gap: 6px; padding: 12px; border-top: 1px solid var(--line); background: var(--sunk); border-radius: 0 0 8px 8px; }
+.recipe-h { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: baseline; padding: 12px 12px 0; }
+.recipe-h .ttl { font-family: var(--f-display); font-weight: 600; }
+.note { font-size: 13px; color: var(--muted); }
+.foot { color: var(--muted); font-size: 12px; padding-block: 0 40px; }
+/* graph */
+.gwrap { position: relative; height: min(72vh, 760px); min-height: 380px; overflow: hidden; border-radius: 8px; background:
+  radial-gradient(circle, color-mix(in srgb, var(--line) 80%, transparent) 1px, transparent 1.2px) 0 0 / 22px 22px, var(--surface); }
+.gwrap svg { width: 100%; height: 100%; display: block; touch-action: none; cursor: grab; user-select: none; }
+.gwrap svg.drag { cursor: grabbing; }
+.gtools { position: absolute; right: 10px; top: 10px; display: flex; gap: 4px; z-index: 2; }
+.gtools .btn { width: 34px; padding: 5px 0; text-align: center; font-family: var(--f-mono); }
+.gtools .btn.w { width: auto; padding-inline: 10px; font-family: var(--f-body); }
+.e { fill: none; stroke-width: 1.6; transition: opacity .15s; }
+.e.craft { stroke: var(--muted); stroke-opacity: .6; }
+.e.recycling { stroke: var(--base); }
+.e.salvaging { stroke: var(--raid); stroke-dasharray: 5 4; }
+.mk-craft { fill: var(--muted); } .mk-recycling { fill: var(--base); } .mk-salvaging { fill: var(--raid); }
+.elab { font: 500 11px var(--f-mono); fill: var(--ink); paint-order: stroke; stroke: var(--surface); stroke-width: 4px; stroke-linejoin: round; opacity: 0; pointer-events: none; transition: opacity .15s; }
+.g-small .elab { opacity: .85; }
+.n { cursor: pointer; transition: opacity .15s; }
+.n rect.box { fill: var(--surface); stroke: var(--line); stroke-width: 1; }
+.n:hover rect.box, .n.hl rect.box { stroke: var(--accent); }
+.n text { font: 500 13px var(--f-body); fill: var(--ink); }
+.n.root rect.box { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 2; }
+.n.root text { font: 700 14px var(--f-display); }
+.gd { fill: var(--rc, var(--r-common)); }
+.ghd { font: 600 10px var(--f-display); letter-spacing: .1em; text-transform: uppercase; fill: var(--muted); }
+svg.dim .n:not(.hl), svg.dim .e:not(.hl) { opacity: .12; }
+svg.dim .elab.hl { opacity: 1; }
+/* map of everything */
+.gwrap.map { height: min(80vh, 900px); }
+.me { fill: none; stroke: var(--muted); stroke-opacity: .22; stroke-width: 1; vector-effect: non-scaling-stroke; }
+.me.recycling { stroke: var(--base); stroke-opacity: .25; stroke-dasharray: 3 3; }
+.mn { cursor: pointer; }
+.mn circle { fill: var(--rc, var(--r-common)); stroke: var(--surface); stroke-width: 1.5; vector-effect: non-scaling-stroke; }
+.mn text { font: 500 11px var(--f-body); fill: var(--ink); paint-order: stroke; stroke: var(--surface); stroke-width: 3px; stroke-linejoin: round; display: none; pointer-events: none; }
+.mn.big text, svg.zin .mn text { display: block; }
+.mhd { font-size: 12px; }
+svg.dim .mn:not(.hl) { opacity: .15; }
+svg.dim .mn:not(.hl) text { display: none; }
+svg.dim .mn.hl text { display: block; }
+svg.dim .me:not(.hl) { stroke-opacity: .05; }
+svg.dim .me.hl { stroke: var(--accent); stroke-opacity: .85; stroke-width: 1.6; }
+svg.dim .me.recycling.hl { stroke: var(--base); }
+.mn.pin circle { stroke: var(--accent); stroke-width: 3; }
+.mn.pin text { font-weight: 700; font-size: 13px; }
+.minfo { position: absolute; left: 10px; top: 10px; z-index: 2; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 10px 12px; display: grid; gap: 4px; max-width: min(300px, calc(100% - 140px)); box-shadow: 0 6px 20px rgba(0,0,0,.12); }
+.mi-n { display: flex; gap: 8px; align-items: center; font-family: var(--f-display); font-size: 15px; }
+.mi-f { font-size: 12px; color: var(--muted); }
+.minfo .btn { margin-top: 4px; justify-self: start; }
+@media (prefers-reduced-motion: reduce) { .tw { transition: none; } .e, .n, .elab { transition: none; } }
+@media (max-width: 560px) { .search kbd { display: none; } .tab { padding-inline: 10px; font-size: 14px; } }
+</style>
+
+<header class="top">
+  <div class="wrap">
+    <div class="brand">ARC Crafting Atlas<small id="stamp">wczytywanie danych…</small></div>
+    <div class="search" role="combobox" aria-expanded="false" aria-haspopup="listbox" aria-owns="sugg">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path></svg>
+      <input id="q" type="text" autocomplete="off" spellcheck="false" placeholder="Szukaj przedmiotu, np. Chemicals, Deadline, Wires…" aria-autocomplete="list" aria-controls="sugg">
+      <kbd>/</kbd>
+      <ul id="sugg" class="sugg" role="listbox" hidden></ul>
+    </div>
+    <button class="btn fbtn" id="fbtn" aria-expanded="false" aria-controls="fpanel">Filtry<span class="fcount" id="fcount"></span></button>
+  </div>
+  <div class="fpanel" id="fpanel" hidden>
+    <div class="wrap">
+      <div class="fhead"><span class="note">Kliknij kategorię, żeby ją ukryć. Ukryte przedmioty znikają z wyszukiwarki, drzew, rankingu i grafu.</span><button class="btn" id="freset">Pokaż wszystko</button></div>
+      <div class="fchips" id="fchips"></div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="head" id="head"></section>
+  <nav class="tabs" role="tablist">
+    <button class="tab" role="tab" id="tab-uses" data-tab="uses" aria-selected="true">Do czego się przyda<span class="n" id="n-uses">–</span></button>
+    <button class="tab" role="tab" id="tab-src" data-tab="sources" aria-selected="false">Jak zdobyć<span class="n" id="n-src">–</span></button>
+    <button class="tab" role="tab" id="tab-graph" data-tab="graph" aria-selected="false">Graf</button>
+    <button class="tab" role="tab" id="tab-map" data-tab="map" aria-selected="false">Mapa wszystkiego</button>
+  </nav>
+  <section class="panel" id="panel"></section>
+</main>
+<footer class="wrap foot" id="foot"></footer>
+
+<script>
+(() => {
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const nf2 = new Intl.NumberFormat("pl-PL", { maximumFractionDigits: 2 });
+const nf3 = new Intl.NumberFormat("pl-PL", { maximumSignificantDigits: 2 });
+const fmt = n => (n == null || !isFinite(n)) ? "—" : (n !== 0 && Math.abs(n) < 1 ? nf3.format(n) : nf2.format(n));
+const slug = n => n.toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+};
+
+let D, ITEMS = {}, byOut = new Map(), byIn = new Map(), recTo = new Map(), recFrom = new Map(),
+    ups = new Map(), projs = new Map(), quests = new Map(), NAMES = [], SLUG = new Map();
+let cur = null, tab = "uses";
+const opt = Object.assign({ recycling: true, salvaging: true, depth: 2, sort: "per", best: true }, store.get("arc-opt", {}));
+let showAll = false, treeFilter = "";
+const hidden = new Set(store.get("arc-hidden", []));
+const typeOf = n => (ITEMS[n] && ITEMS[n].type) || "Other";
+const vis = n => n === cur || !hidden.has(typeOf(n));
+
+const push = (m, k, v) => { let a = m.get(k); if (!a) m.set(k, a = []); a.push(v); };
+
+function init(data) {
+  D = data; ITEMS = data.items;
+  for (const r of data.recipes) { push(byOut, r.out, r); for (const [n] of r.in) push(byIn, n, r); }
+  for (const r of data.recycle) { push(recFrom, r.in, r); for (const [o, q] of r.out) push(recTo, o, { src: r.in, qty: q, type: r.type }); }
+  for (const u of data.upgrades) push(ups, u.item, u);
+  for (const p of data.projects) push(projs, p.item, p);
+  for (const q of data.quests) push(quests, q.item, q);
+  const all = new Set([...byOut.keys(), ...byIn.keys(), ...recFrom.keys(), ...recTo.keys(), ...ups.keys(), ...projs.keys(), ...quests.keys()]);
+  NAMES = [...all].sort((a, b) => a.localeCompare(b));
+  for (const n of NAMES) SLUG.set(slug(n), n);
+  $("#stamp").textContent = `dane z wiki: ${data.fetched}`;
+  renderFilters();
+  $("#foot").innerHTML = `Źródło: <a href="${esc(data.source)}" target="_blank" rel="noopener">ARC Raiders Wiki</a> (Cargo: crafting, recycling, workshopUpgrades, projectItems, questItems). ${NAMES.length} przedmiotów, ${data.recipes.length} przepisów, ${data.recycle.length} wpisów recyklingu. Pobrano ${esc(data.fetched)}.`;
+  route();
+}
+
+/* ---------- category filters ---------- */
+function renderFilters() {
+  const counts = new Map();
+  for (const n of NAMES) counts.set(typeOf(n), (counts.get(typeOf(n)) || 0) + 1);
+  const types = [...counts].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+  $("#fchips").innerHTML = types.map(([t, c]) => `<button class="fchip" data-type="${esc(t)}" aria-pressed="${!hidden.has(t)}">${t === "Other" ? "Inne / bez typu" : esc(t)}<b>${c}</b></button>`).join("");
+  $("#fcount").textContent = hidden.size ? `${hidden.size} ukryte` : "";
+  $("#freset").hidden = !hidden.size;
+}
+function filtersChanged() {
+  store.set("arc-hidden", [...hidden]); descMemo.clear(); renderFilters(); render();
+}
+$("#fbtn").onclick = () => {
+  const p = $("#fpanel"); p.hidden = !p.hidden; $("#fbtn").setAttribute("aria-expanded", String(!p.hidden));
+};
+$("#fchips").addEventListener("click", e => {
+  const b = e.target.closest(".fchip"); if (!b) return;
+  const t = b.dataset.type; hidden.has(t) ? hidden.delete(t) : hidden.add(t); filtersChanged();
+});
+$("#freset").onclick = () => { hidden.clear(); filtersChanged(); };
+
+/* ---------- helpers ---------- */
+const rarity = n => (ITEMS[n] && ITEMS[n].rarity || "none").toLowerCase();
+function link(n, extra = "") {
+  return `<a class="it${n === cur ? " cur" : ""}" href="#${slug(n)}" ${extra}><span class="dot rar-${rarity(n)}"></span><span class="nm">${esc(n)}</span></a>`;
+}
+function markText(n, f) {
+  if (!f) return esc(n);
+  const i = n.toLowerCase().indexOf(f);
+  return i < 0 ? esc(n) : esc(n.slice(0, i)) + "<mark>" + esc(n.slice(i, i + f.length)) + "</mark>" + esc(n.slice(i + f.length));
+}
+function needBadges(n) {
+  const b = [];
+  if (ups.has(n)) b.push(`<span class="bd" title="Potrzebne do ulepszeń stołów">ulepszenia ${ups.get(n).length}</span>`);
+  if (projs.has(n)) b.push(`<span class="bd" title="Potrzebne do projektów">projekty ${new Set(projs.get(n).map(p => p.project)).size}</span>`);
+  if (quests.has(n)) b.push(`<span class="bd" title="Potrzebne do questów">questy ${quests.get(n).length}</span>`);
+  return b.length ? `<span class="badges">${b.join("")}</span>` : "";
+}
+const stations = r => r.stations.length ? `<span class="st">${r.stations.map(esc).join(" / ")}</span>` : "";
+const bp = r => r.blueprint ? `<span class="bp" title="${esc(r.blueprint)}">blueprint</span>` : "";
+
+// all items reachable upward (used in, transitively)
+const descMemo = new Map();
+function desc(n) {
+  if (descMemo.has(n)) return descMemo.get(n);
+  const seen = new Set(), stack = [n];
+  while (stack.length) {
+    const x = stack.pop();
+    for (const r of byIn.get(x) || []) if (!seen.has(r.out) && r.out !== n && vis(r.out)) { seen.add(r.out); stack.push(r.out); }
+  }
+  descMemo.set(n, seen); return seen;
+}
+
+/* ---------- routing ---------- */
+function route() {
+  const s = decodeURIComponent(location.hash.slice(1));
+  const n = SLUG.get(s) || (cur ? cur : (SLUG.get("chemicals") || NAMES[0]));
+  if (n !== cur) { cur = n; showAll = false; treeFilter = ""; }
+  render();
+  window.scrollTo({ top: 0 });
+}
+window.addEventListener("hashchange", route);
+function go(n) { if (slug(n) === location.hash.slice(1)) route(); else location.hash = slug(n); }
+
+/* ---------- header ---------- */
+function renderHead() {
+  const it = ITEMS[cur] || {};
+  const r = rarity(cur);
+  const facts = [];
+  if (it.type) facts.push(`<span>${esc(it.type)}</span>`);
+  if (it.value != null) facts.push(`<span>wartość <b>${fmt(it.value)}</b></span>`);
+  if (it.weight != null) facts.push(`<span>waga <b>${fmt(it.weight)} kg</b></span>`);
+  if (it.stack != null) facts.push(`<span>stos <b>${it.stack}</b></span>`);
+  facts.push(`<a href="https://arcraiders.wiki/wiki/${encodeURIComponent(cur.replace(/ /g, "_"))}" target="_blank" rel="noopener">strona na wiki ↗</a>`);
+  const chips = [];
+  for (const u of ups.get(cur) || []) chips.push(`<span class="chip k-up"><span class="ct">stół</span>${esc(u.station)} ${u.level}<b>×${u.qty}</b></span>`);
+  const pj = new Map();
+  for (const p of projs.get(cur) || []) pj.set(p.project, (pj.get(p.project) || 0) + p.qty);
+  for (const [p, q] of pj) chips.push(`<span class="chip"><span class="ct">projekt</span>${esc(p)}<b>×${q}</b></span>`);
+  for (const q of quests.get(cur) || []) chips.push(`<span class="chip"><span class="ct">quest</span>${esc(q.quest)}<b>×${q.qty}</b></span>`);
+  $("#head").className = `head rar-${r}`;
+  $("#head").innerHTML = `<div class="hinfo">
+    <div class="kicker"><span class="dot rar-${r}"></span>${r === "none" ? "przedmiot" : esc(it.rarity)}</div>
+    <h1>${esc(cur)}</h1>
+    <div class="facts">${facts.join("")}</div>
+    ${chips.length ? `<div class="needs"><span class="lbl">Nie sprzedawaj, potrzebne do</span>${chips.join("")}</div>` : ""}
+    </div>${summaryCard()}`;
+  document.title = `${cur} · ARC Raiders Crafting Atlas`;
+}
+
+/* ---------- summary card ---------- */
+function summaryCard() {
+  const total = list => { let s = 0; for (const [n, q] of list) { const v = ITEMS[n] && ITEMS[n].value; if (v == null) return null; s += v * q; } return s; };
+  const lines = (list, per = 1) => `<div class="ing">${list.map(([n, q]) => `<span class="q"><b>${fmt(q / per)}×</b></span><span>${link(n)}</span>`).join("")}</div>`;
+  const own = ITEMS[cur] && ITEMS[cur].value;
+  const recs = byOut.get(cur) || [];
+  const rows = recFrom.get(cur) || [];
+  const secs = [];
+  if (recs.length) {
+    secs.push(`<div class="sc-sec"><h3>Craft z</h3>${recs.map((r, i) => {
+      const v = total(r.in);
+      return `<div class="sc-r">
+        <div class="sc-meta">${recs.length > 1 ? `<b>przepis ${i + 1}</b>` : ""}${stations(r)}${bp(r)}${r.qty > 1 ? `<span class="st">daje ${r.qty} szt.</span>` : ""}${r.skill ? `<span class="st">${esc(r.skill)}</span>` : ""}</div>
+        ${lines(r.in)}
+        ${v != null && i === recs.length - 1 ? `<div class="sc-v">składniki warte <b>${fmt(v)}</b>${own != null ? ` · przedmiot <b>${fmt(own * r.qty)}</b>` : ""}</div>` : ""}
+      </div>`;
+    }).join("")}</div>`);
+  }
+  for (const t of ["recycling", "salvaging"]) {
+    const row = rows.find(x => x.type === t);
+    if (!row) continue;
+    const v = total(row.out);
+    secs.push(`<div class="sc-sec"><h3><span class="tg ${t}">${t === "recycling" ? "baza" : "rajd"}</span>${t === "recycling" ? "Recykling w bazie" : "Rozbiórka w rajdzie"}</h3>
+      ${lines(row.out)}
+      ${v != null ? `<div class="sc-v">razem warte <b>${fmt(v)}</b>${own != null ? ` · sprzedaż <b>${fmt(own)}</b> <span class="${v > own ? "good" : "bad"}">${v > own ? "lepiej rozłożyć" : "lepiej sprzedać"}</span>` : ""}</div>` : ""}
+    </div>`);
+  }
+  if (!secs.length) {
+    return `<aside class="card scard slim" aria-label="Podsumowanie"><div class="sc-sec"><span class="sc-none"><b>${esc(cur)}</b> nie da się ani wytworzyć, ani rozłożyć. To surowiec bazowy: wypada jako łup albo z recyklingu innych przedmiotów (zakładka „Jak zdobyć”).</span></div></aside>`;
+  }
+  if (!recs.length) secs.unshift(`<div class="sc-sec"><h3>Craft z</h3><span class="sc-none">Nie da się wytworzyć.</span></div>`);
+  if (!rows.length) secs.push(`<div class="sc-sec"><h3>Rozkłada się na</h3><span class="sc-none">Nie da się rozłożyć.</span></div>`);
+  return `<aside class="card scard" aria-label="Podsumowanie" style="--cols:${secs.length}">${secs.join("")}</aside>`;
+}
+
+/* ---------- uses tree ---------- */
+function usesChildren(n, path) {
+  return (byIn.get(n) || []).filter(r => !path.has(r.out) && vis(r.out)).map(r => {
+    const q = r.in.find(x => x[0] === n)[1];
+    return { r, per: q / r.qty };
+  }).sort((a, b) => a.r.out.localeCompare(b.r.out));
+}
+let nodeBudget = 0;
+function usesNode(c, cum, depth, path, f, autoOpen) {
+  const n = c.r.out, total = cum * c.per;
+  const kids = usesChildren(n, path);
+  const matchSelf = f && n.toLowerCase().includes(f);
+  const row = `<span class="nm-wrap">${link(n).replace(`<span class="nm">${esc(n)}</span>`, `<span class="nm">${markText(n, f)}</span>`)}</span>
+    <span class="q"><b>${fmt(c.per)}×</b> ${esc(depth === 1 ? cur : c.parent)} / szt.${c.r.qty > 1 ? ` (przepis daje ${c.r.qty})` : ""}</span>
+    ${depth > 1 ? `<span class="q">łącznie <b>${fmt(total)}</b> ${esc(cur)}</span>` : ""}
+    ${stations(c.r)} ${bp(c.r)} ${needBadges(n)}`;
+  if (!kids.length) return `<li><div class="row"><span class="leafpad"></span>${row}</div></li>`;
+  const open = autoOpen(n, depth);
+  const data = `data-n="${esc(n)}" data-cum="${total}" data-depth="${depth}" data-path="${esc(JSON.stringify([...path, n]))}"`;
+  let inner = "";
+  if (open && nodeBudget > 0) inner = usesList(n, total, depth + 1, new Set([...path, n]), f, autoOpen);
+  return `<li><details ${open ? "open" : ""} ${data} ${inner ? 'data-done="1"' : ""}><summary class="row"><span class="tw">▶</span>${row}<span class="q">· ${kids.length} dalej</span></summary>${inner}</details></li>`;
+}
+function usesList(n, cum, depth, path, f, autoOpen) {
+  let kids = usesChildren(n, path);
+  if (f) kids = kids.filter(c => c.r.out.toLowerCase().includes(f) || [...desc(c.r.out)].some(x => x.toLowerCase().includes(f)));
+  if (!kids.length) return "";
+  nodeBudget -= kids.length;
+  return `<ul>${kids.map(c => usesNode({ ...c, parent: n }, cum, depth, path, f, autoOpen)).join("")}</ul>`;
+}
+function renderUses(mode) {
+  const direct = (byIn.get(cur) || []).filter(r => vis(r.out));
+  const all = desc(cur);
+  const nonCraft = (ups.get(cur) || []).length + (projs.get(cur) || []).length + (quests.get(cur) || []).length;
+  if (!direct.length) {
+    return `<div class="sec"><h2>Łańcuch craftingu</h2><div class="card empty">Żaden przepis nie używa <b>${esc(cur)}</b>.${nonCraft ? " Przedmiot jest za to potrzebny do ulepszeń, projektów lub questów (lista powyżej)." : " Możesz go sprzedać albo przerobić w recyklingu."}</div></div>`;
+  }
+  const f = treeFilter.trim().toLowerCase();
+  const autoOpen = mode === "all" ? () => true
+    : f ? (n) => !n.toLowerCase().includes(f) || [...desc(n)].some(x => x.toLowerCase().includes(f))
+    : (n, d) => d === 1 && all.size <= 40;
+  nodeBudget = mode === "all" ? 4000 : 1500;
+  const list = usesList(cur, 1, 1, new Set([cur]), f, autoOpen);
+  return `<div class="sec">
+    <h2>Łańcuch craftingu</h2>
+    <p class="sub"><b>${esc(cur)}</b> trafia bezpośrednio do ${new Set(direct.map(r => r.out)).size} przepisów, a dalej w łańcuchu do ${all.size} przedmiotów. Przy każdym poziomie widać, ile sztuk poprzedniego elementu trzeba na 1 sztukę i ile <b>${esc(cur)}</b> to łącznie po tej ścieżce.</p>
+    <div class="controls">
+      <label class="ctl" for="tf">Pokaż tylko ścieżki do <input id="tf" type="search" placeholder="np. Deadline" value="${esc(treeFilter)}"></label>
+      <button class="btn" id="expand">Rozwiń wszystko</button>
+      <button class="btn" id="collapse">Zwiń</button>
+    </div>
+    <div class="card"><div class="tree">${list || `<div class="empty">Żadna ścieżka nie prowadzi do „${esc(treeFilter)}”.</div>`}</div></div>
+  </div>`;
+}
+function bindUses() {
+  const tf = $("#tf");
+  if (!tf) return;
+  tf.addEventListener("input", () => {
+    treeFilter = tf.value; const pos = tf.selectionStart;
+    renderPanel(); const t = $("#tf"); t.focus(); t.setSelectionRange(pos, pos);
+  });
+  $("#expand").onclick = () => renderPanel("all");
+  $("#collapse").onclick = () => { treeFilter = ""; renderPanel("none"); };
+}
+{
+  $("#panel").addEventListener("toggle", e => {
+    const d = e.target;
+    if (d.tagName !== "DETAILS" || !d.open || d.dataset.done || !d.dataset.n) return;
+    d.dataset.done = "1";
+    nodeBudget = 1500;
+    d.insertAdjacentHTML("beforeend", usesList(d.dataset.n, +d.dataset.cum, +d.dataset.depth + 1, new Set(JSON.parse(d.dataset.path)), "", () => false));
+  }, true);
+}
+
+/* ---------- sources ---------- */
+function sourcePaths(target) {
+  const out = [];
+  const dfs = (item, mult, chain, seen, depth) => {
+    for (const e of recTo.get(item) || []) {
+      if (!opt[e.type] || seen.has(e.src) || !vis(e.src) || out.length > 20000) continue;
+      const m = mult * e.qty;
+      const steps = [{ from: e.src, to: item, qty: e.qty, type: e.type }, ...chain];
+      out.push({ src: e.src, yield: m, steps });
+      if (depth < opt.depth) dfs(e.src, m, steps, new Set([...seen, e.src]), depth + 1);
+    }
+  };
+  dfs(target, 1, [], new Set([target]), 1);
+  for (const p of out) {
+    const it = ITEMS[p.src] || {};
+    p.per = p.yield;
+    p.val = it.value ? p.yield / it.value * 100 : null;
+    p.kg = it.weight ? p.yield / it.weight : null;
+    p.loop = (byOut.get(p.src) || []).some(r => r.in.some(x => x[0] === target));
+  }
+  return out;
+}
+const SORTS = { per: ["per", "na 1 szt."], val: ["val", "na 100 wartości"], kg: ["kg", "na 1 kg"] };
+function renderSources() {
+  let paths = sourcePaths(cur);
+  const key = SORTS[opt.sort][0];
+  const cmp = (a, b) => ((b[key] ?? -1) - (a[key] ?? -1)) || (a.steps.length - b.steps.length) || (b.yield - a.yield);
+  if (opt.best) {
+    const best = new Map();
+    for (const p of paths) { const o = best.get(p.src); if (!o || cmp(p, o) < 0) best.set(p.src, p); }
+    paths = [...best.values()];
+  }
+  paths.sort(cmp);
+  const srcCount = new Set(paths.map(p => p.src)).size;
+  const max = Math.max(...paths.map(p => p[key] ?? 0), 0) || 1;
+  const shown = showAll ? paths : paths.slice(0, 40);
+  const seg = (name, vals) => `<span class="seg">${vals.map(([v, l]) => `<button data-opt="${name}" data-val="${v}" aria-pressed="${String(opt[name]) === String(v)}">${l}</button>`).join("")}</span>`;
+  const rows = shown.map((p, i) => {
+    const first = p.steps[0];
+    const by = (recFrom.get(p.src) || []).find(r => r.type === first.type);
+    const extra = by ? by.out.filter(([o]) => o !== first.to && vis(o)).map(([o, q]) => `${q}× ${esc(o)}`) : [];
+    const chain = p.steps.map(s => `<span class="arrow"><span class="tg ${s.type}" title="${s.type === "recycling" ? "recykling w bazie" : "rozbiórka w rajdzie"}">${s.type === "recycling" ? "baza" : "rajd"}</span>×${s.qty}</span>${s.to === cur ? `<b>${esc(cur)}</b>` : link(s.to)}`).join("");
+    const cell = k => {
+      const v = p[k];
+      if (v == null) return "—";
+      return k === key ? `<span class="metric"><i style="width:${Math.max(4, v / max * 100)}%"></i><span>${fmt(v)}</span></span>` : fmt(v);
+    };
+    return `<tr class="${i === 0 ? "top1" : ""}">
+      <td class="rank">${i + 1}</td>
+      <td>${link(p.src)}${extra.length ? `<div class="by">przy okazji: ${extra.join(", ")}</div>` : ""}${p.loop ? `<div class="warn">sam jest craftowany z ${esc(cur)}</div>` : ""}</td>
+      <td><div class="chain">${link(p.src)}${chain}</div></td>
+      <td class="num">${cell("per")}</td><td class="num">${cell("val")}</td><td class="num">${cell("kg")}</td>
+    </tr>`;
+  }).join("");
+  const th = (k, l) => `<th class="num${key === k ? " sorted" : ""}">${l}</th>`;
+  const recycleSec = `<div class="sec">
+    <h2>Recykling i rozbiórka</h2>
+    <p class="sub">Co rozłożyć, żeby dostać <b>${esc(cur)}</b>, także przez kilka rozbiórek po kolei. Liczby mówią, ile <b>${esc(cur)}</b> daje jedna sztuka przedmiotu wejściowego. Na górze są najbardziej opłacalne opcje według wybranej miary.</p>
+    <div class="controls">
+      <span class="ctl">Rodzaj
+        <span class="seg"><button data-flag="recycling" aria-pressed="${opt.recycling}">recykling w bazie</button><button data-flag="salvaging" aria-pressed="${opt.salvaging}">rozbiórka w rajdzie</button></span></span>
+      <span class="ctl">Kroki ${seg("depth", [[1, "1"], [2, "2"], [3, "3"]])}</span>
+      <span class="ctl">Najlepsze ${seg("sort", Object.entries(SORTS).map(([k, v]) => [k, v[1]]))}</span>
+      <label class="ctl" for="best"><input type="checkbox" id="best" ${opt.best ? "checked" : ""}> tylko najlepsza ścieżka na przedmiot</label>
+    </div>
+    <div class="card">${paths.length ? `<div class="tblwrap"><table>
+      <thead><tr><th>#</th><th>Rozłóż</th><th>Ścieżka</th>${th("per", "na 1 szt.")}${th("val", "na 100 wart.")}${th("kg", "na 1 kg")}</tr></thead>
+      <tbody>${rows}</tbody></table></div>
+      ${paths.length > shown.length ? `<div class="more"><button class="btn" id="all">Pokaż wszystkie (${paths.length})</button></div>` : ""}`
+      : `<div class="empty">Żaden przedmiot nie daje <b>${esc(cur)}</b> przy tych ustawieniach.${!opt.recycling || !opt.salvaging || opt.depth < 3 ? " Spróbuj włączyć oba rodzaje rozbiórki albo zwiększyć liczbę kroków." : ""}</div>`}
+    </div>
+    <div class="legend"><span><span class="tg recycling">baza</span> recykling w bazie (pełny uzysk)</span><span><span class="tg salvaging">rajd</span> rozbiórka w trakcie rajdu (mniejszy uzysk)</span><span><b>na 100 wart.</b> uzysk na każde 100 wartości sprzedażnej, którą tracisz, rozkładając przedmiot</span><span><b>na 1 kg</b> uzysk na kilogram miejsca w plecaku</span></div>
+  </div>`;
+  return { html: craftSection() + recycleSec, count: srcCount + (byOut.get(cur) || []).length };
+}
+
+/* ---------- crafting down ---------- */
+function craftSection() {
+  const recs = byOut.get(cur) || [];
+  if (!recs.length) return `<div class="sec"><h2>Crafting</h2><div class="card empty"><b>${esc(cur)}</b> nie da się wytworzyć. Zdobędziesz go tylko jako łup albo z recyklingu (poniżej).</div></div>`;
+  const cards = recs.map((r, i) => {
+    const totals = new Map();
+    const node = (n, need, path) => {
+      const sub = (byOut.get(n) || [])[0];
+      if (!sub || path.has(n) || path.size > 7) { totals.set(n, (totals.get(n) || 0) + need); return `<li><div class="row"><span class="leafpad"></span><span class="q"><b>${fmt(need)}×</b></span>${link(n)} ${needBadges(n)}</div></li>`; }
+      const np = new Set([...path, n]);
+      return `<li><details open><summary class="row"><span class="tw">▶</span><span class="q"><b>${fmt(need)}×</b></span>${link(n)} <span class="st">craft: ${sub.stations.map(esc).join(" / ")}${sub.qty > 1 ? `, daje ${sub.qty}` : ""}</span> ${bp(sub)}</summary>
+        <ul>${sub.in.filter(([m]) => vis(m)).map(([m, q]) => node(m, need * q / sub.qty, np)).join("")}</ul></details></li>`;
+    };
+    const tree = `<ul>${r.in.filter(([m]) => vis(m)).map(([m, q]) => node(m, q / r.qty, new Set([cur]))).join("")}</ul>`;
+    const deep = r.in.some(([m]) => byOut.has(m));
+    return `<div class="card">
+      <div class="recipe-h"><span class="ttl">${recs.length > 1 ? `Przepis ${i + 1}` : "Przepis"}</span>${stations(r)}${bp(r)}${r.qty > 1 ? `<span class="note">daje ${r.qty} szt., ilości poniżej na 1 szt.</span>` : ""}${r.skill ? `<span class="note">wymaga: ${esc(r.skill)}</span>` : ""}</div>
+      <div class="tree">${tree}</div>
+      ${deep ? `<div class="totals"><span class="note" style="width:100%">Surowce bazowe łącznie, gdy craftujesz wszystko od zera (na 1 szt.):</span>${[...totals].map(([n, q]) => `<span class="chip"><b>${fmt(q)}×</b>${link(n)}</span>`).join("")}</div>` : ""}
+    </div>`;
+  }).join("");
+  return `<div class="sec"><h2>Crafting</h2><p class="sub">Z czego się robi <b>${esc(cur)}</b>, rozpisane aż do składników, których nie da się już wytworzyć.</p><div style="display:grid;gap:12px">${cards}</div></div>`;
+}
+
+/* ---------- render ---------- */
+function renderPanel(mode) {
+  const panel = $("#panel");
+  if (tab === "uses") { panel.innerHTML = renderUses(mode); bindUses(); }
+  else if (tab === "graph") { panel.innerHTML = renderGraphShell(); bindGraph(); }
+  else if (tab === "map") { panel.innerHTML = renderMapShell(); bindMap(); }
+  else {
+    const s = renderSources(); panel.innerHTML = s.html; $("#n-src").textContent = s.count;
+    panel.querySelectorAll("[data-flag]").forEach(b => b.onclick = () => { opt[b.dataset.flag] = !opt[b.dataset.flag]; saveOpt(); renderPanel(); });
+    panel.querySelectorAll("[data-opt]").forEach(b => b.onclick = () => { const v = b.dataset.val; opt[b.dataset.opt] = isNaN(+v) ? v : +v; saveOpt(); renderPanel(); });
+    const best = $("#best"); if (best) best.onchange = () => { opt.best = best.checked; saveOpt(); renderPanel(); };
+    const all = $("#all"); if (all) all.onclick = () => { showAll = true; renderPanel(); };
+  }
+}
+const saveOpt = () => store.set("arc-opt", opt);
+function render() {
+  renderHead();
+  $("#n-uses").textContent = desc(cur).size;
+  if (tab !== "sources") {
+    const keep = tab; tab = "sources"; $("#n-src").textContent = renderSources().count; tab = keep;
+  }
+  document.querySelectorAll(".tab").forEach(t => t.setAttribute("aria-selected", String(t.dataset.tab === tab)));
+  renderPanel();
+}
+document.querySelectorAll(".tab").forEach(t => t.onclick = () => { tab = t.dataset.tab; store.set("arc-tab", tab); render(); });
+tab = ["uses", "sources", "graph", "map"].includes(store.get("arc-tab", "uses")) ? store.get("arc-tab", "uses") : "uses";
+
+/* ---------- graph ---------- */
+const G = Object.assign({ up: 0, src: 8, craft: true }, store.get("arc-graph", {}));
+const NODE_H = 28, VGAP = 10, CGAP = 96;
+let measureCtx;
+function textW(s, root) {
+  measureCtx = measureCtx || document.createElement("canvas").getContext("2d");
+  measureCtx.font = root ? "700 14px 'Chakra Petch', sans-serif" : "500 13px 'IBM Plex Sans', sans-serif";
+  return Math.ceil(measureCtx.measureText(s).width);
+}
+function upNodes(D) {
+  const seen = new Set([cur]); let frontier = [cur];
+  for (let d = 1; d <= D && frontier.length; d++) {
+    const next = [];
+    for (const n of frontier) for (const r of byIn.get(n) || []) if (!seen.has(r.out) && vis(r.out)) { seen.add(r.out); next.push(r.out); }
+    frontier = next;
+  }
+  return seen;
+}
+function maxUpDepth() { let d = 0, prev = 1; while (d < 12) { const s = upNodes(d + 1).size; if (s === prev) break; prev = s; d++; } return d; }
+function buildGraph() {
+  const nodes = new Map(), edges = new Map();
+  const node = (id, name, side) => { if (!nodes.has(id)) nodes.set(id, { id, name, side }); return id; };
+  const edge = (from, to, kind, qty) => { const k = `${from}>${to}>${kind}`; if (!edges.has(k)) edges.set(k, { from, to, kind, qty }); };
+  node("C", cur, "c");
+  // right: uses
+  const full = maxUpDepth();
+  let D = G.up || 0;
+  if (!D) { D = 1; for (let d = 1; d <= full; d++) { if (upNodes(d).size <= 70) D = d; else break; } }
+  D = Math.min(D, full);
+  const inc = full ? upNodes(D) : new Set([cur]);
+  const rid = n => n === cur ? "C" : "R:" + n;
+  for (const n of inc) {
+    if (n !== cur) node(rid(n), n, "r");
+    for (const r of byIn.get(n) || []) if (inc.has(r.out) && r.out !== cur) {
+      node(rid(r.out), r.out, "r");
+      edge(rid(n), rid(r.out), "craft", r.in.find(x => x[0] === n)[1] / r.qty);
+    }
+  }
+  // left: crafting ingredients
+  const lid = n => n === cur ? "C" : "L:" + n;
+  if (G.craft) {
+    const rec = (item, path, d) => {
+      for (const r of byOut.get(item) || []) for (const [m, q] of r.in) {
+        if (path.has(m) || !vis(m)) continue;
+        node(lid(m), m, "l"); edge(lid(m), lid(item), "craft", q / r.qty);
+        if (d < 3) rec(m, new Set([...path, m]), d + 1);
+      }
+    };
+    rec(cur, new Set([cur]), 1);
+  }
+  // left: best recycling paths
+  let srcN = 0;
+  if (G.src) {
+    const key = SORTS[opt.sort][0], best = new Map();
+    const cmp = (a, b) => ((b[key] ?? -1) - (a[key] ?? -1)) || (a.steps.length - b.steps.length) || (b.yield - a.yield);
+    for (const p of sourcePaths(cur)) { const o = best.get(p.src); if (!o || cmp(p, o) < 0) best.set(p.src, p); }
+    const top = [...best.values()].sort(cmp).slice(0, G.src);
+    srcN = best.size;
+    for (const p of top) for (const s of p.steps) {
+      node(lid(s.from), s.from, "l"); if (s.to !== cur) node(lid(s.to), s.to, "l");
+      edge(lid(s.from), lid(s.to), s.type, s.qty);
+    }
+  }
+  return { nodes, edges: [...edges.values()], D, full, srcN };
+}
+function layoutGraph(g) {
+  const preds = new Map(), succs = new Map();
+  for (const n of g.nodes.keys()) { preds.set(n, []); succs.set(n, []); }
+  for (const e of g.edges) { succs.get(e.from).push(e.to); preds.get(e.to).push(e.from); }
+  // longest-path layering, cycle-safe
+  const memo = new Map();
+  const depth = (id, nb, vis = new Set()) => {
+    if (id === "C") return 0;
+    const k = id; if (memo.has(k)) return memo.get(k);
+    vis.add(id); let best = 1;
+    for (const p of nb.get(id)) if (!vis.has(p) && (p === "C" || g.nodes.get(p).side === g.nodes.get(id).side)) best = Math.max(best, depth(p, nb, vis) + 1);
+    vis.delete(id); memo.set(k, best); return best;
+  };
+  for (const n of g.nodes.values()) n.level = n.side === "c" ? 0 : n.side === "r" ? depth(n.id, preds) : -depth(n.id, succs);
+  const layers = new Map();
+  for (const n of g.nodes.values()) push(layers, n.level, n);
+  const lv = [...layers.keys()].sort((a, b) => a - b);
+  for (const l of lv) layers.get(l).sort((a, b) => a.name.localeCompare(b.name)).forEach((n, i) => n.ord = i);
+  const pos = n => n.ord - (layers.get(n.level).length - 1) / 2;
+  const sweep = order => {
+    for (const l of order) {
+      if (l === 0) continue;
+      const L = layers.get(l);
+      for (const n of L) {
+        const nb = [...preds.get(n.id), ...succs.get(n.id)].map(id => g.nodes.get(id)).filter(m => m.level !== l);
+        n.bc = nb.length ? nb.reduce((s, m) => s + pos(m), 0) / nb.length : pos(n);
+      }
+      L.sort((a, b) => a.bc - b.bc).forEach((n, i) => n.ord = i);
+    }
+  };
+  const right = lv.filter(l => l > 0), left = lv.filter(l => l < 0).reverse();
+  for (let i = 0; i < 6; i++) { sweep(i % 2 ? [...right].reverse() : right); sweep(i % 2 ? [...left].reverse() : left); }
+  // coordinates
+  const colW = new Map();
+  for (const l of lv) colW.set(l, Math.max(...layers.get(l).map(n => (n.w = textW(n.name, l === 0) + (l === 0 ? 40 : 34)))));
+  const colX = new Map([[0, -colW.get(0) / 2]]);
+  let x = colX.get(0) + colW.get(0);
+  for (const l of right) { x += CGAP; colX.set(l, x); x += colW.get(l); }
+  x = colX.get(0);
+  for (const l of left) { x -= CGAP + colW.get(l); colX.set(l, x); }
+  for (const l of lv) {
+    const L = layers.get(l), W = colW.get(l);
+    for (const n of L) {
+      n.w = l === 0 ? W : n.w;
+      n.x = l < 0 ? colX.get(l) + W - n.w : colX.get(l);
+      n.h = l === 0 ? 36 : NODE_H;
+      n.y = pos(n) * (NODE_H + VGAP) - n.h / 2;
+    }
+  }
+  const tops = new Map(lv.map(l => [l, Math.min(...layers.get(l).map(n => n.y))]));
+  return { preds, succs, layers, lv, colX, colW, tops };
+}
+function renderGraphShell() {
+  const seg = (name, vals) => `<span class="seg">${vals.map(([v, l]) => `<button data-g="${name}" data-val="${v}" aria-pressed="${String(G[name]) === String(v)}">${l}</button>`).join("")}</span>`;
+  const full = maxUpDepth();
+  return `<div class="sec">
+    <h2>Graf zależności</h2>
+    <p class="sub">Po lewej widać, z czego się robi <b>${esc(cur)}</b> i co najlepiej rozłożyć, żeby go zdobyć. Po prawej jest wszystko, do czego trafia dalej. Najedź na przedmiot, żeby podświetlić jego ścieżki z ilościami, a kliknij, żeby go otworzyć. Kółko myszy przybliża, przeciąganie przesuwa.</p>
+    <div class="controls">
+      <span class="ctl">Zastosowania ${seg("up", [[0, "auto"], ...Array.from({ length: Math.min(full, 5) }, (_, i) => [i + 1, String(i + 1)]), ...(full > 5 ? [[full, "wszystkie"]] : [])])}</span>
+      <span class="ctl">Najlepsze źródła z recyklingu ${seg("src", [[0, "0"], [5, "5"], [8, "8"], [15, "15"], [30, "30"]])}</span>
+      <label class="ctl" for="gcraft"><input type="checkbox" id="gcraft" ${G.craft ? "checked" : ""}> składniki craftingu</label>
+    </div>
+    <div class="card gwrap" id="gwrap">
+      <div class="gtools"><button class="btn" id="gzi" aria-label="Przybliż">+</button><button class="btn" id="gzo" aria-label="Oddal">−</button><button class="btn w" id="gfit">Dopasuj</button></div>
+      <svg id="gsvg" role="img" aria-label="Graf zależności dla ${esc(cur)}"></svg>
+    </div>
+    <div class="legend" id="glegend"></div>
+  </div>`;
+}
+function bindGraph() {
+  $("#panel").querySelectorAll("[data-g]").forEach(b => b.onclick = () => { G[b.dataset.g] = +b.dataset.val; store.set("arc-graph", G); renderPanel(); });
+  $("#gcraft").onchange = e => { G.craft = e.target.checked; store.set("arc-graph", G); renderPanel(); };
+  (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(drawGraph);
+}
+function drawGraph() {
+  const svg = $("#gsvg"); if (!svg) return;
+  const g = buildGraph(), L = layoutGraph(g);
+  const NS = "http://www.w3.org/2000/svg";
+  const nodes = [...g.nodes.values()];
+  let s = `<defs>${["craft", "recycling", "salvaging"].map(k => `<marker id="mk-${k}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="mk-${k}" d="M0 1L9 5L0 9z"></path></marker>`).join("")}</defs><g id="vp">`;
+  for (const l of L.lv) if (l !== 0) {
+    const x = L.colX.get(l) + (l < 0 ? L.colW.get(l) : 0);
+    s += `<text class="ghd" x="${x}" y="${L.tops.get(l) - 12}" text-anchor="${l < 0 ? "end" : "start"}">${l < 0 ? `${-l}. krok wstecz` : `${l}. poziom`}</text>`;
+  }
+  g.edges.forEach((e, i) => {
+    const a = g.nodes.get(e.from), b = g.nodes.get(e.to);
+    const x1 = a.x + a.w, y1 = a.y + a.h / 2, x2 = b.x - 2, y2 = b.y + b.h / 2, dx = Math.max(30, (x2 - x1) / 2);
+    e.i = i;
+    s += `<path class="e ${e.kind}" data-e="${i}" d="M${x1} ${y1}C${x1 + dx} ${y1} ${x2 - dx} ${y2} ${x2} ${y2}" marker-end="url(#mk-${e.kind})"></path>`;
+  });
+  g.edges.forEach((e, i) => {
+    const a = g.nodes.get(e.from), b = g.nodes.get(e.to);
+    const mx = (a.x + a.w + b.x) / 2, my = (a.y + a.h / 2 + b.y + b.h / 2) / 2;
+    s += `<text class="elab" data-e="${i}" x="${mx}" y="${my + 4}" text-anchor="middle">${fmt(e.qty)}×</text>`;
+  });
+  for (const n of nodes) {
+    const root = n.side === "c";
+    s += `<g class="n${root ? " root" : ""}" data-id="${esc(n.id)}" transform="translate(${n.x} ${n.y})"><title>${esc(n.name)}</title>
+      <rect class="box" width="${n.w}" height="${n.h}" rx="4"></rect>
+      <rect class="gd rar-${rarity(n.name)}" x="${root ? 13 : 11}" y="${n.h / 2 - 4}" width="8" height="8" transform="rotate(45 ${(root ? 13 : 11) + 4} ${n.h / 2})"></rect>
+      <text x="${root ? 28 : 25}" y="${n.h / 2 + 4.5}">${esc(n.name)}</text></g>`;
+  }
+  svg.innerHTML = s + "</g>";
+  svg.classList.toggle("g-small", g.edges.length <= 24);
+  const vp = svg.querySelector("#vp");
+
+  // legend + notes
+  const kinds = new Set(g.edges.map(e => e.kind));
+  const notes = [];
+  if (kinds.has("craft")) notes.push(`<span><svg width="28" height="8" aria-hidden="true"><path class="e craft" d="M0 4H28"></path></svg> składnik craftingu (ile sztuk na 1 szt. wyniku)</span>`);
+  if (kinds.has("recycling")) notes.push(`<span><svg width="28" height="8" aria-hidden="true"><path class="e recycling" d="M0 4H28"></path></svg> recykling w bazie (ile sztuk wypada)</span>`);
+  if (kinds.has("salvaging")) notes.push(`<span><svg width="28" height="8" aria-hidden="true"><path class="e salvaging" d="M0 4H28"></path></svg> rozbiórka w rajdzie</span>`);
+  if (g.full > g.D) notes.push(`<span>Zastosowania pokazane do ${g.D}. poziomu z ${g.full}. Więcej ustawisz nad grafem.</span>`);
+  if (G.src && g.srcN > G.src) notes.push(`<span>Źródła z recyklingu: ${G.src} najlepszych z ${g.srcN} według miary „${SORTS[opt.sort][1]}” z zakładki „Jak zdobyć”.</span>`);
+  notes.push(`<span>${nodes.length} przedmiotów, ${g.edges.length} powiązań</span>`);
+  $("#glegend").innerHTML = notes.join("");
+
+  const bb = { x0: Math.min(...nodes.map(n => n.x)), x1: Math.max(...nodes.map(n => n.x + n.w)), y0: Math.min(...nodes.map(n => n.y)) - 30, y1: Math.max(...nodes.map(n => n.y + n.h)) };
+  const pz = panZoom(svg, vp, bb, {
+    onTap: el => { if (el && el.dataset.id !== "C") go(g.nodes.get(el.dataset.id).name); }
+  });
+  const drag = () => pz.dragging();
+
+  // highlight paths through a node
+  const reach = (start, nb) => { const seen = new Set([start]), st = [start]; while (st.length) for (const m of nb.get(st.pop())) if (!seen.has(m)) { seen.add(m); st.push(m); } return seen; };
+  const hl = id => {
+    const up = reach(id, L.preds), down = reach(id, L.succs);
+    const on = new Set([...up, ...down]);
+    svg.classList.add("dim");
+    svg.querySelectorAll(".n").forEach(el => el.classList.toggle("hl", on.has(el.dataset.id)));
+    g.edges.forEach(e => {
+      const yes = (up.has(e.from) && up.has(e.to)) || (down.has(e.from) && down.has(e.to));
+      svg.querySelectorAll(`[data-e="${e.i}"]`).forEach(el => el.classList.toggle("hl", yes));
+    });
+  };
+  const clear = () => { svg.classList.remove("dim"); svg.querySelectorAll(".hl").forEach(el => el.classList.remove("hl")); };
+  svg.querySelectorAll(".n").forEach(el => {
+    el.addEventListener("pointerenter", e => { if (e.pointerType === "mouse" && !drag()) hl(el.dataset.id); });
+    el.addEventListener("pointerleave", e => { if (e.pointerType === "mouse") clear(); });
+  });
+}
+
+/* ---------- shared pan & zoom ---------- */
+function panZoom(svg, vp, bb, { onTap, onZoom, maxK = 3, sel = ".n" } = {}) {
+  const T = { x: 0, y: 0, k: 1 };
+  const apply = () => { vp.setAttribute("transform", `translate(${T.x} ${T.y}) scale(${T.k})`); if (onZoom) onZoom(T.k); };
+  const fit = () => {
+    const W = svg.clientWidth, H = svg.clientHeight;
+    T.k = Math.max(0.05, Math.min(1.25, (W - 40) / (bb.x1 - bb.x0), (H - 70) / (bb.y1 - bb.y0)));
+    T.x = W / 2 - (bb.x0 + bb.x1) / 2 * T.k; T.y = (H + 30) / 2 - (bb.y0 + bb.y1) / 2 * T.k; apply();
+  };
+  const zoomAt = (f, cx, cy) => { const k = Math.min(maxK, Math.max(0.05, T.k * f)); T.x = cx - (cx - T.x) * k / T.k; T.y = cy - (cy - T.y) * k / T.k; T.k = k; apply(); };
+  fit();
+  svg.addEventListener("wheel", e => { e.preventDefault(); const r = svg.getBoundingClientRect(); zoomAt(Math.exp(-e.deltaY * 0.0015), e.clientX - r.left, e.clientY - r.top); }, { passive: false });
+  $("#gzi").onclick = () => zoomAt(1.3, svg.clientWidth / 2, svg.clientHeight / 2);
+  $("#gzo").onclick = () => zoomAt(1 / 1.3, svg.clientWidth / 2, svg.clientHeight / 2);
+  $("#gfit").onclick = fit;
+  const ptrs = new Map(); let drag = null, moved = false, pinch = null;
+  svg.addEventListener("pointerdown", e => {
+    svg.setPointerCapture(e.pointerId); ptrs.set(e.pointerId, [e.clientX, e.clientY]);
+    if (ptrs.size === 1) { drag = { x: e.clientX, y: e.clientY, tx: T.x, ty: T.y }; moved = false; }
+    if (ptrs.size === 2) { const [a, b] = [...ptrs.values()]; pinch = { d: Math.hypot(a[0] - b[0], a[1] - b[1]), k: T.k }; }
+  });
+  svg.addEventListener("pointermove", e => {
+    if (!ptrs.has(e.pointerId)) return;
+    ptrs.set(e.pointerId, [e.clientX, e.clientY]);
+    if (pinch && ptrs.size === 2) {
+      const [a, b] = [...ptrs.values()], r = svg.getBoundingClientRect();
+      zoomAt(pinch.k * Math.hypot(a[0] - b[0], a[1] - b[1]) / pinch.d / T.k, (a[0] + b[0]) / 2 - r.left, (a[1] + b[1]) / 2 - r.top);
+      moved = true; return;
+    }
+    if (!drag) return;
+    const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+    if (Math.abs(dx) + Math.abs(dy) > 4) { moved = true; svg.classList.add("drag"); }
+    if (moved) { T.x = drag.tx + dx; T.y = drag.ty + dy; apply(); }
+  });
+  const end = e => {
+    ptrs.delete(e.pointerId); svg.classList.remove("drag");
+    if (ptrs.size < 2) pinch = null;
+    if (ptrs.size === 0) {
+      if (drag && !moved && onTap) {
+        const el = document.elementFromPoint(e.clientX, e.clientY);
+        onTap(el && el.closest ? el.closest(sel) : null);
+      }
+      drag = null;
+    }
+  };
+  svg.addEventListener("pointerup", end);
+  svg.addEventListener("pointercancel", end);
+  return {
+    fit, zoomAt, T, dragging: () => !!drag && moved,
+    center(x, y, k) { T.k = k; T.x = svg.clientWidth / 2 - x * k; T.y = svg.clientHeight / 2 - y * k; apply(); }
+  };
+}
+
+/* ---------- map of everything ---------- */
+const M = Object.assign({ recycle: false }, store.get("arc-map", {}));
+let d3p = null, mapCache = null, mapPin = null;
+const loadD3 = () => d3p || (d3p = new Promise((res, rej) => {
+  if (window.d3) return res();
+  const s = document.createElement("script");
+  s.src = "https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js";
+  s.onload = res; s.onerror = () => { d3p = null; rej(new Error("Nie udało się wczytać biblioteki d3.")); };
+  document.head.appendChild(s);
+}));
+const COLX = 260;
+function mapData() {
+  const key = [...hidden].sort().join("|") + "#" + M.recycle;
+  if (mapCache && mapCache.key === key) return mapCache;
+  const ok = n => !hidden.has(typeOf(n));
+  const nodes = new Map(), links = [];
+  const add = n => { if (!nodes.has(n)) nodes.set(n, { id: n, deg: 0 }); };
+  const seenL = new Set();
+  const link = (a, b, kind, qty) => { const k = a + ">" + b + ">" + kind; if (seenL.has(k)) return; seenL.add(k); add(a); add(b); links.push({ source: a, target: b, kind, qty }); };
+  for (const r of D.recipes) if (ok(r.out)) for (const [m, q] of r.in) if (ok(m) && m !== r.out) link(m, r.out, "craft", q / r.qty);
+  if (M.recycle) for (const r of D.recycle) if (r.type === "recycling" && ok(r.in)) for (const [o, q] of r.out) if (ok(o) && o !== r.in) link(r.in, o, "recycling", q);
+  // craft tier: 0 = raw material, n = 1 + deepest ingredient; -1 = only good for recycling
+  const memo = new Map();
+  const tier = (n, vis = new Set()) => {
+    if (memo.has(n)) return memo.get(n);
+    const rs = (byOut.get(n) || []);
+    if (!rs.length || vis.has(n)) return 0;
+    vis.add(n); let t = 1;
+    for (const r of rs) for (const [m] of r.in) if (ok(m) && m !== n) t = Math.max(t, tier(m, vis) + 1);
+    vis.delete(n); memo.set(n, t); return t;
+  };
+  const ingr = new Set(links.filter(l => l.kind === "craft").map(l => l.source));
+  for (const nd of nodes.values()) nd.tier = byOut.has(nd.id) ? tier(nd.id) : ingr.has(nd.id) ? 0 : -1;
+  for (const l of links) { nodes.get(l.source).deg++; nodes.get(l.target).deg++; }
+  const arr = [...nodes.values()];
+  let seed = 7; const rng = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  for (const n of arr) { n.r = 3.5 + Math.sqrt(n.deg) * 1.5; n.x = n.tier * COLX + (rng() - .5) * 120; n.y = (rng() - .5) * 900; }
+  const sim = d3.forceSimulation(arr).randomSource(rng)
+    .force("link", d3.forceLink(links).id(d => d.id).distance(70).strength(l => l.kind === "craft" ? 0.05 : 0.01))
+    .force("charge", d3.forceManyBody().strength(-55).distanceMax(450))
+    .force("x", d3.forceX(d => d.tier * COLX).strength(0.35))
+    .force("y", d3.forceY(0).strength(0.035))
+    .force("collide", d3.forceCollide(d => d.r + 4))
+    .stop();
+  for (let i = 0; i < 320; i++) sim.tick();
+  const big = new Set([...arr].sort((a, b) => b.deg - a.deg).slice(0, 28).map(n => n.id));
+  const preds = new Map(arr.map(n => [n.id, []])), succs = new Map(arr.map(n => [n.id, []]));
+  for (const l of links) if (l.kind === "craft") { succs.get(l.source.id).push(l.target.id); preds.get(l.target.id).push(l.source.id); }
+  mapCache = { key, nodes, arr, links, big, preds, succs };
+  return mapCache;
+}
+function renderMapShell() {
+  return `<div class="sec">
+    <h2>Mapa wszystkiego</h2>
+    <p class="sub">Wszystkie przedmioty z craftingu naraz. Od lewej są surowce, a w prawo kolejne poziomy craftingu aż do gotowych przedmiotów. Większa kropka oznacza więcej powiązań. Najedź, żeby zobaczyć łańcuch przedmiotu. Kliknij, żeby go przypiąć, a kliknięcie tła zdejmuje przypięcie. Po przybliżeniu pojawiają się wszystkie nazwy.</p>
+    <div class="controls">
+      <label class="ctl" for="mrec"><input type="checkbox" id="mrec" ${M.recycle ? "checked" : ""}> pokaż recykling w bazie</label>
+      <button class="btn" id="mcur">Pokaż ${esc(cur)}</button>
+    </div>
+    <div class="card gwrap map" id="gwrap">
+      <div class="gtools"><button class="btn" id="gzi" aria-label="Przybliż">+</button><button class="btn" id="gzo" aria-label="Oddal">−</button><button class="btn w" id="gfit">Dopasuj</button></div>
+      <div class="minfo" id="minfo" hidden></div>
+      <svg id="msvg" role="img" aria-label="Mapa wszystkich zależności craftingu"><text x="24" y="40" class="ghd">Układam mapę…</text></svg>
+    </div>
+    <div class="legend" id="mlegend"></div>
+  </div>`;
+}
+function bindMap() {
+  $("#mrec").onchange = e => { M.recycle = e.target.checked; store.set("arc-map", M); renderPanel(); };
+  mapPin = cur;
+  loadD3().then(() => requestAnimationFrame(drawMap)).catch(err => {
+    const s = $("#msvg"); if (s) s.innerHTML = `<text x="24" y="40" class="ghd">${esc(err.message)}</text>`;
+  });
+}
+function drawMap() {
+  const svg = $("#msvg"); if (!svg) return;
+  const m = mapData();
+  const tiers = [...new Set(m.arr.map(n => n.tier))].sort((a, b) => a - b);
+  const y0 = Math.min(...m.arr.map(n => n.y - n.r)), y1 = Math.max(...m.arr.map(n => n.y + n.r));
+  const tierName = t => t === -1 ? "tylko do recyklingu" : t === 0 ? "surowce" : `poziom ${t}`;
+  let s = `<g id="mvp">`;
+  for (const t of tiers) s += `<text class="ghd mhd" x="${t * COLX}" y="${y0 - 40}" text-anchor="middle">${tierName(t)}</text>`;
+  s += `<g class="mlinks">`;
+  m.links.forEach(l => {
+    const a = l.source, b = l.target, dx = (b.x - a.x) * 0.45;
+    s += `<path class="me ${l.kind}" data-a="${esc(a.id)}" data-b="${esc(b.id)}" d="M${a.x.toFixed(1)} ${a.y.toFixed(1)}C${(a.x + dx).toFixed(1)} ${a.y.toFixed(1)} ${(b.x - dx).toFixed(1)} ${b.y.toFixed(1)} ${b.x.toFixed(1)} ${b.y.toFixed(1)}"></path>`;
+  });
+  s += `</g><g class="mnodes">`;
+  for (const n of m.arr) {
+    s += `<g class="mn${m.big.has(n.id) ? " big" : ""}" data-id="${esc(n.id)}" transform="translate(${n.x.toFixed(1)} ${n.y.toFixed(1)})"><title>${esc(n.id)}</title>
+      <circle class="rar-${rarity(n.id)}" r="${n.r.toFixed(1)}"></circle><text x="${(n.r + 4).toFixed(1)}" y="4">${esc(n.id)}</text></g>`;
+  }
+  svg.innerHTML = s + "</g></g>";
+  const vp = svg.querySelector("#mvp");
+  const byId = new Map([...svg.querySelectorAll(".mn")].map(el => [el.dataset.id, el]));
+  const edgeEls = [...svg.querySelectorAll(".me")];
+  const bb = { x0: Math.min(...m.arr.map(n => n.x - n.r)) - 20, x1: Math.max(...m.arr.map(n => n.x + n.r)) + 140, y0: y0 - 60, y1 };
+  const pz = panZoom(svg, vp, bb, {
+    sel: ".mn", maxK: 6,
+    onZoom: k => svg.classList.toggle("zin", k > 1.6),
+    onTap: el => { mapPin = el ? el.dataset.id : null; show(mapPin); }
+  });
+  const reach = (start, nb) => { const seen = new Set([start]), st = [start]; while (st.length) for (const x of nb.get(st.pop()) || []) if (!seen.has(x)) { seen.add(x); st.push(x); } return seen; };
+  const info = (id, nUp, nDown) => {
+    const box = $("#minfo");
+    if (!id) { box.hidden = true; return; }
+    const it = ITEMS[id] || {};
+    box.innerHTML = `<div class="mi-n"><span class="dot rar-${rarity(id)}"></span><b>${esc(id)}</b></div>
+      <div class="mi-f">${esc(it.type || "")}${it.rarity ? ` · ${esc(it.rarity)}` : ""}</div>
+      <div class="mi-f">składa się z ${nUp} · trafia do ${nDown}</div>
+      ${id === cur ? `<div class="mi-f">to aktualny przedmiot</div>` : `<button class="btn" id="mopen">Otwórz ${esc(id)}</button>`}`;
+    box.hidden = false;
+    const o = $("#mopen"); if (o) o.onclick = () => go(id);
+  };
+  function show(id) {
+    svg.querySelectorAll(".hl,.pin").forEach(el => el.classList.remove("hl", "pin"));
+    if (!id || !m.nodes.has(id)) { svg.classList.remove("dim"); info(null); return; }
+    const up = reach(id, m.preds), down = reach(id, m.succs);
+    svg.classList.add("dim");
+    for (const x of [...up, ...down]) byId.get(x).classList.add("hl");
+    byId.get(id).classList.add("pin");
+    for (const el of edgeEls) {
+      const a = el.dataset.a, b = el.dataset.b;
+      if ((up.has(a) && up.has(b)) || (down.has(a) && down.has(b)) || (el.classList.contains("recycling") && (a === id || b === id))) el.classList.add("hl");
+    }
+    byId.get(id).parentNode.appendChild(byId.get(id));
+    info(id, up.size - 1, down.size - 1);
+  }
+  svg.querySelectorAll(".mn").forEach(el => {
+    el.addEventListener("pointerenter", e => { if (e.pointerType === "mouse" && !pz.dragging()) show(el.dataset.id); });
+    el.addEventListener("pointerleave", e => { if (e.pointerType === "mouse") show(mapPin); });
+  });
+  $("#mcur").onclick = () => {
+    mapPin = cur; show(cur);
+    const n = m.nodes.get(cur); if (n) pz.center(n.x, n.y, 1.8);
+  };
+  $("#mcur").hidden = !m.nodes.has(cur);
+  show(mapPin);
+  const counts = tiers.map(t => `${tierName(t)}: ${m.arr.filter(n => n.tier === t).length}`).join(" · ");
+  $("#mlegend").innerHTML = `<span>${m.arr.length} przedmiotów, ${m.links.length} powiązań${hidden.size ? `, ukryte kategorie: ${[...hidden].map(esc).join(", ")}` : ""}</span><span>${counts}</span>${M.recycle ? `<span><svg width="28" height="8" aria-hidden="true"><path class="e recycling" d="M0 4H28"></path></svg> recykling w bazie</span>` : ""}`;
+}
+
+/* ---------- search ---------- */
+const q = $("#q"), sugg = $("#sugg"), box = q.parentElement;
+let hits = [], active = 0;
+function score(n, s) {
+  const l = n.toLowerCase();
+  if (l === s) return 0;
+  if (l.startsWith(s)) return 1;
+  if (l.split(/[\s-]+/).some(w => w.startsWith(s))) return 2;
+  if (l.includes(s)) return 3;
+  return -1;
+}
+function showSugg() {
+  const s = q.value.trim().toLowerCase();
+  if (!s) { sugg.hidden = true; box.setAttribute("aria-expanded", "false"); return; }
+  hits = NAMES.map(n => [n, score(n, s)]).filter(x => x[1] >= 0 && !hidden.has(typeOf(x[0]))).sort((a, b) => a[1] - b[1] || a[0].localeCompare(b[0])).slice(0, 14).map(x => x[0]);
+  active = 0;
+  sugg.innerHTML = hits.length ? hits.map((n, i) => `<li role="option" id="o${i}" data-n="${esc(n)}" aria-selected="${i === 0}"><span class="dot rar-${rarity(n)}"></span><span>${markText(n, s)}</span><span class="t">${esc((ITEMS[n] && ITEMS[n].type) || (byOut.has(n) ? "craftowalny" : ""))}</span></li>`).join("")
+    : `<li aria-disabled="true"><span class="t" style="margin:0">Nic nie pasuje do „${esc(q.value)}”.</span></li>`;
+  sugg.hidden = false; box.setAttribute("aria-expanded", "true");
+}
+function pick(n) { q.value = ""; sugg.hidden = true; q.blur(); go(n); }
+q.addEventListener("input", showSugg);
+q.addEventListener("focus", showSugg);
+q.addEventListener("keydown", e => {
+  if (sugg.hidden || !hits.length) { if (e.key === "Escape") q.blur(); return; }
+  if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+    e.preventDefault();
+    active = (active + (e.key === "ArrowDown" ? 1 : -1) + hits.length) % hits.length;
+    sugg.querySelectorAll("li").forEach((li, i) => li.setAttribute("aria-selected", String(i === active)));
+    sugg.children[active].scrollIntoView({ block: "nearest" });
+  } else if (e.key === "Enter") { e.preventDefault(); pick(hits[active]); }
+  else if (e.key === "Escape") { sugg.hidden = true; }
+});
+sugg.addEventListener("mousedown", e => { const li = e.target.closest("li[data-n]"); if (li) { e.preventDefault(); pick(li.dataset.n); } });
+document.addEventListener("click", e => { if (!box.contains(e.target)) sugg.hidden = true; });
+document.addEventListener("keydown", e => {
+  if (e.key === "/" && document.activeElement.tagName !== "INPUT") { e.preventDefault(); q.focus(); }
+});
+
+fetch("data.json").then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }).then(init).catch(err => {
+  $("#stamp").textContent = "brak danych";
+  $("#head").innerHTML = `<h1>Nie udało się wczytać danych</h1><p class="sub">Strona czyta plik <code>data.json</code> leżący obok niej (${esc(err.message)}). Uruchom <code>python3 fetch_data.py</code>, a potem otwórz stronę przez serwer: <code>python3 -m http.server</code> w tym folderze i adres <code>http://localhost:8000</code>. Otwarcie pliku bezpośrednio z dysku blokuje wczytanie danych.</p>`;
+});
+})();
+</script>

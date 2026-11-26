@@ -194,6 +194,8 @@ details[open] > summary .tw { transform: rotate(90deg); }
 .recipe-h { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: baseline; padding: 12px 12px 0; }
 .recipe-h .ttl { font-family: var(--f-display); font-weight: 600; }
 .note { font-size: 13px; color: var(--muted); }
+.nw { white-space: nowrap; margin-right: 8px; display: inline-flex; gap: 4px; align-items: baseline; }
+.nw b { font-family: var(--f-mono); font-weight: 500; }
 .foot { color: var(--muted); font-size: 12px; padding-block: 0 40px; }
 /* graph */
 .gwrap { position: relative; height: min(72vh, 760px); min-height: 380px; overflow: hidden; border-radius: 8px; background:
@@ -314,7 +316,8 @@ const store = {
 };
 
 let D, ITEMS = {}, byOut = new Map(), byIn = new Map(), recTo = new Map(), recFrom = new Map(),
-    ups = new Map(), projs = new Map(), quests = new Map(), NAMES = [], SLUG = new Map();
+    ups = new Map(), projs = new Map(), quests = new Map(), NAMES = [], SLUG = new Map(),
+    ampUse = new Map(), ampOf = new Map(), resUse = new Map(), resBy = new Map();
 let cur = null, tab = "uses";
 const opt = Object.assign({ recycling: true, salvaging: true, depth: 2, sort: "per", best: true, raid: false }, store.get("arc-opt", {}));
 let showAll = false, treeFilter = "";
@@ -353,12 +356,14 @@ function init(data) {
   for (const u of data.upgrades) push(ups, u.item, u);
   for (const p of data.projects) push(projs, p.item, p);
   for (const q of data.quests) push(quests, q.item, q);
-  const all = new Set([...byOut.keys(), ...byIn.keys(), ...recFrom.keys(), ...recTo.keys(), ...ups.keys(), ...projs.keys(), ...quests.keys()]);
+  for (const a of data.amps || []) { push(ampUse, a.item, a); push(ampOf, a.weapon, a); }
+  for (const r of data.research || []) { push(resUse, r.item, r); push(resBy, r.project, r); push(resBy, "→" + r.unlocks, r); }
+  const all = new Set([...byOut.keys(), ...byIn.keys(), ...recFrom.keys(), ...recTo.keys(), ...ups.keys(), ...projs.keys(), ...quests.keys(), ...ampUse.keys(), ...ampOf.keys(), ...resUse.keys()]);
   NAMES = [...all].sort((a, b) => a.localeCompare(b));
   for (const n of NAMES) SLUG.set(slug(n), n);
   $("#stamp").textContent = `dane z wiki: ${data.fetched}`;
   renderFilters();
-  $("#foot").innerHTML = `Źródło: <a href="${esc(data.source)}" target="_blank" rel="noopener">ARC Raiders Wiki</a> (Cargo: crafting, recycling, workshopUpgrades, projectItems, questItems). ${NAMES.length} przedmiotów, ${data.recipes.length} przepisów, ${data.recycle.length} wpisów recyklingu. Pobrano ${esc(data.fetched)}.`;
+  $("#foot").innerHTML = `Źródło: <a href="${esc(data.source)}" target="_blank" rel="noopener">ARC Raiders Wiki</a> (Cargo: crafting, recycling, workshopUpgrades, projectItems, questItems; amplifikacje ze stron Amplified Weapons i Amplified Research). ${NAMES.length} przedmiotów, ${data.recipes.length} przepisów, ${data.recycle.length} wpisów recyklingu. Pobrano ${esc(data.fetched)}.`;
   route();
 }
 
@@ -400,6 +405,8 @@ function needBadges(n) {
   if (ups.has(n)) b.push(`<span class="bd" title="Potrzebne do ulepszeń stołów">ulepszenia ${ups.get(n).length}</span>`);
   if (projs.has(n)) b.push(`<span class="bd" title="Potrzebne do projektów">projekty ${new Set(projs.get(n).map(p => p.project)).size}</span>`);
   if (quests.has(n)) b.push(`<span class="bd" title="Potrzebne do questów">questy ${quests.get(n).length}</span>`);
+  if (ampUse.has(n)) b.push(`<span class="bd" title="Materiał do amplifikacji broni na poziomie V">amplifikacje ${ampUse.get(n).length}</span>`);
+  if (resUse.has(n) && n !== "Research Points") b.push(`<span class="bd" title="Potrzebne do badań amplifikacji">badania ${resUse.get(n).length}</span>`);
   return b.length ? `<span class="badges">${b.join("")}</span>` : "";
 }
 const stations = r => r.stations.length ? `<span class="st">${r.stations.map(esc).join(" / ")}</span>` : "";
@@ -445,6 +452,8 @@ function renderHead() {
   for (const p of projs.get(cur) || []) pj.set(p.project, (pj.get(p.project) || 0) + p.qty);
   for (const [p, q] of pj) chips.push(`<span class="chip"><span class="ct">projekt</span>${esc(p)}<b>×${q}</b></span>`);
   for (const q of quests.get(cur) || []) chips.push(`<span class="chip"><span class="ct">quest</span>${esc(q.quest)}<b>×${q.qty}</b></span>`);
+  for (const a of ampUse.get(cur) || []) chips.push(`<span class="chip"><span class="ct">amplifikacja</span>${esc(a.weapon)} · ${esc(a.amp)}<b>×${a.qty}</b></span>`);
+  if (cur !== "Research Points") for (const r of resUse.get(cur) || []) chips.push(`<span class="chip"><span class="ct">badanie</span>${esc(r.project)}<b>×${fmt(r.qty)}</b></span>`);
   $("#head").className = `head rar-${r}`;
   $("#head").innerHTML = `<div class="hinfo">
     <div class="kicker"><span class="dot rar-${r}"></span>${r === "none" ? "przedmiot" : esc(it.rarity)}</div>
@@ -522,12 +531,48 @@ function usesList(n, cum, depth, path, f, autoOpen) {
   nodeBudget -= kids.length;
   return `<ul>${kids.map(c => usesNode({ ...c, parent: n }, cum, depth, path, f, autoOpen)).join("")}</ul>`;
 }
+/* ---------- amplifications (weapons at level V) ---------- */
+// Badanie odblokowujące amplifikację: po nazwie projektu, a gdy wiki ma w niej literówkę, po tym, co odblokowuje.
+const resFor = a => (a.research && resBy.get(a.research)) || resBy.get("→" + a.amp) || [];
+const costLine = list => list.map(x => `<span class="nw"><b>${fmt(x.qty)}×</b> ${x.item === "Research Points" ? esc(x.item) : link(x.item)}</span>`).join(" ");
+function resCell(a) {
+  const r = resFor(a);
+  if (!r.length) return a.research ? esc(a.research) : `<span class="note">bez badania</span>`;
+  return `${esc(r[0].project)}<div class="by">${costLine(r)}</div>`;
+}
+function ampSection() {
+  const out = [];
+  const uses = ampUse.get(cur) || [];
+  if (uses.length) out.push(`<div class="card"><div class="recipe-h"><span class="ttl">Amplifikacje broni</span><span class="note">materiał do amplifikacji broni na poziomie V</span></div><div class="tblwrap"><table>
+    <thead><tr><th class="num">Ile</th><th>Broń</th><th>Amplifikacja</th><th>Najpierw badanie</th><th>Wymaga</th></tr></thead><tbody>
+    ${uses.map(a => `<tr><td class="num"><b>${a.qty}×</b></td><td>${link(a.weapon)}</td><td>${esc(a.amp)}</td><td>${resCell(a)}</td><td>${a.requires ? esc(a.requires) : "—"}</td></tr>`).join("")}
+    </tbody></table></div></div>`);
+  const res = cur === "Research Points" ? [] : resUse.get(cur) || [];
+  if (res.length) out.push(`<div class="card"><div class="recipe-h"><span class="ttl">Badania amplifikacji</span><span class="note">Research Station 4, krok 2 projektu</span></div><div class="tblwrap"><table>
+    <thead><tr><th class="num">Ile</th><th>Projekt badawczy</th><th>Odblokowuje</th><th>Pełny koszt</th></tr></thead><tbody>
+    ${res.map(r => `<tr><td class="num"><b>${fmt(r.qty)}×</b></td><td>${esc(r.project)}</td><td>${esc(r.unlocks || "—")}</td><td>${costLine(resBy.get(r.project))}</td></tr>`).join("")}
+    </tbody></table></div></div>`);
+  const own = ampOf.get(cur) || [];
+  if (own.length) {
+    const by = new Map(); for (const a of own) push(by, a.amp, a);
+    out.push(`<div class="card"><div class="recipe-h"><span class="ttl">Amplifikacje tej broni</span><span class="note">po ulepszeniu do poziomu V; wybranej amplifikacji nie da się potem zmienić</span></div><div class="tblwrap"><table>
+      <thead><tr><th>Amplifikacja</th><th>Materiały</th><th>Najpierw badanie</th><th>Wymaga</th></tr></thead><tbody>
+      ${[...by].map(([amp, list]) => `<tr><td>${esc(amp)}</td><td>${costLine(list)}</td><td>${resCell(list[0])}</td><td>${list[0].requires ? esc(list[0].requires) : "—"}</td></tr>`).join("")}
+      </tbody></table></div></div>`);
+  }
+  return out.length ? `<div class="sec"><h2>Amplifikacje</h2><p class="sub">Z wiki (strony Amplified Weapons i Amplified Research). Amplifikacje wymagają Gunsmith 4 i Research Station 4.</p><div style="display:grid;gap:12px">${out.join("")}</div></div>` : "";
+}
+const ampCount = n => (ampUse.get(n) || []).length + (n === "Research Points" ? 0 : (resUse.get(n) || []).length);
+
 function renderUses(mode) {
+  return ampSection() + renderChain(mode);
+}
+function renderChain(mode) {
   const direct = (byIn.get(cur) || []).filter(r => vis(r.out));
   const all = desc(cur);
-  const nonCraft = (ups.get(cur) || []).length + (projs.get(cur) || []).length + (quests.get(cur) || []).length;
+  const nonCraft = (ups.get(cur) || []).length + (projs.get(cur) || []).length + (quests.get(cur) || []).length + ampCount(cur);
   if (!direct.length) {
-    return `<div class="sec"><h2>Łańcuch craftingu</h2><div class="card empty">Żaden przepis nie używa <b>${esc(cur)}</b>.${nonCraft ? " Przedmiot jest za to potrzebny do ulepszeń, projektów lub questów (lista powyżej)." : " Możesz go sprzedać albo przerobić w recyklingu."}</div></div>`;
+    return `<div class="sec"><h2>Łańcuch craftingu</h2><div class="card empty">Żaden przepis nie używa <b>${esc(cur)}</b>.${nonCraft ? " Przedmiot jest za to potrzebny do ulepszeń, projektów, questów lub amplifikacji (lista powyżej)." : " Możesz go sprzedać albo przerobić w recyklingu."}</div></div>`;
   }
   const f = treeFilter.trim().toLowerCase();
   const autoOpen = mode === "all" ? () => true
@@ -684,7 +729,7 @@ function renderPanel(mode) {
 const saveOpt = () => store.set("arc-opt", opt);
 function render() {
   renderHead();
-  $("#n-uses").textContent = desc(cur).size;
+  $("#n-uses").textContent = desc(cur).size + ampCount(cur);
   $("#n-calc").textContent = CALC.list.length || "–";
   if (tab !== "sources") {
     const keep = tab; tab = "sources"; $("#n-src").textContent = renderSources().count; tab = keep;

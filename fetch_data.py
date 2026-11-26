@@ -59,6 +59,66 @@ def category_members(cat):
         cont = data["continue"]
 
 
+def wikitext(page):
+    """Surowy wikitext strony."""
+    params = {"action": "parse", "format": "json", "page": page, "prop": "wikitext"}
+    req = urllib.request.Request(API + "?" + urllib.parse.urlencode(params), headers={"User-Agent": UA})
+    with urllib.request.urlopen(req, timeout=60) as r:
+        return json.load(r)["parse"]["wikitext"]["*"]
+
+
+LINKED = re.compile(r"([\d,]+)\s*\[\[([^\]|#]+)(?:[^\]]*)\]\]")
+TIER = {"Common": "I", "Uncommon": "II", "Rare": "III", "Epic": "IV", "Legendary": "V"}
+B3 = "'" * 3  # pogrubienie w wikitekście
+
+
+def parse_amplified(text):
+    """Strona „Amplified Weapons”: dla każdej broni na poziomie V jej amplifikacje i ich materiały.
+
+    Tych danych nie ma w Cargo, tylko w tekście strony: blok broni zaczyna się od {{ILink|…|2=Kettle V|…|4=Kettle_IV}},
+    a każda amplifikacja to tabelka z nagłówkiem „! … | Nazwa” i pogrubionymi liniami Materials, Research, Requires.
+    Zwraca (amplifikacje, ulepszenia do V jako [broń V, broń bazowa])."""
+    amps, levels = [], []
+    for b in re.split(r"\{\{ILink\|", text)[1:]:
+        head = b.split("}}", 1)[0]
+        args = dict(a.split("=", 1) for a in head.split("|") if "=" in a)
+        weapon, base = args.get("2", "").strip(), args.get("4", "").replace("_", " ").strip()
+        if not weapon:
+            continue
+        if base:
+            levels.append([weapon, base])
+        for t in re.split(r"\n\{\|", b)[1:]:
+            t = t.split("\n|}", 1)[0]
+            m = re.search(r"^!.*\|\s*([^|\n]+?)\s*$", t, re.M)
+            mat = re.search(B3 + r"Materials:" + B3 + r"(.*)", t)
+            if not (m and mat):
+                continue
+            res = re.search(B3 + r"Research:" + B3 + r"\s*\[\[(?:[^\]|]*\|)?([^\]]+)\]\]", t)
+            req = re.search(B3 + r"Requires:" + B3 + r"\s*([^<\n]+)", t)
+            for qty, item in LINKED.findall(mat.group(1)):
+                amps.append({"weapon": weapon, "amp": m.group(1), "item": item.strip(), "qty": num(qty.replace(",", ""), default=1),
+                             "research": res.group(1).strip() if res else None,
+                             "requires": req.group(1).strip() if req else None})
+    return amps, levels
+
+
+def parse_amp_research(text):
+    """Strona „Amplified Research”: koszt każdego projektu badawczego (krok 2) i amplifikacja, którą odblokowuje."""
+    out = []
+    for part in re.split(r"^=== " + B3, text, flags=re.M)[1:]:
+        name = part.split(B3, 1)[0].strip()
+        un = re.search(r"^\|\s*(?!valign)([^|\n][^\n]*)$", part, re.M)
+        step2 = part.split("Step 2 =", 1)[1].split("</tabber>", 1)[0] if "Step 2 =" in part else ""
+        items = LINKED.findall(step2)
+        rp = re.search(r"\*\s*([\d,]+)\s+Research Points", step2)
+        if rp:
+            items.append((rp.group(1), "Research Points"))
+        for qty, item in items:
+            out.append({"project": name, "unlocks": un.group(1).strip() if un else None,
+                        "item": item.strip(), "qty": num(qty.replace(",", ""), default=1)})
+    return out
+
+
 def num(v, cast=int, default=None):
     try:
         return cast(v)
@@ -168,6 +228,34 @@ def main():
     for rar in ("Common", "Uncommon", "Rare", "Epic", "Legendary", "Amplified"):
         for w in category_members(f"Category:{rar} Weapons"):
             weapon_rarity[w] = rar
+
+    # Amplifikacje (broń na poziomie V) są tylko w tekście dwóch stron wiki, nie w Cargo. Gdy parser nic nie
+    # znajdzie (ktoś przebudował stronę), bierzemy poprzednie dane z data.json i ostrzegamy, zamiast je zgubić.
+    print("amplifications…")
+    amps, levels = parse_amplified(wikitext("Amplified Weapons"))
+    research = parse_amp_research(wikitext("Amplified Research"))
+    prev = {}
+    if not amps or not research:
+        try:
+            prev = json.loads(out_path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            pass
+    if not amps:
+        amps = prev.get("amps", [])
+        levels = [[r["out"], r["in"][0][0]] for r in prev.get("recipes", []) if r.get("amplified")]
+        print(f"UWAGA: nie znalazłem amplifikacji na stronie Amplified Weapons, zostawiam poprzednie ({len(amps)}).")
+    if not research:
+        research = prev.get("research", [])
+        print(f"UWAGA: nie znalazłem badań na stronie Amplified Research, zostawiam poprzednie ({len(research)}).")
+    # Ulepszenie do V: broń z poprzedniego poziomu + moduł amplifikacji zależny od rzadkości broni (tabela
+    # „Upgrading” na tej samej stronie). Dokładamy je jako zwykłe przepisy: graf i kalkulator liczą je jak inne ulepszenia.
+    have = {r["out"] for r in recipes}
+    for weapon, base in levels:
+        tier = TIER.get(weapon_rarity.get(re.sub(r"\s+(I|II|III|IV|V)$", "", base)) or "")
+        if weapon in have or not tier:
+            continue
+        recipes.append({"out": weapon, "qty": 1, "in": [[base, 1], [f"Amplification Module Mk. {tier}", 1]],
+                        "stations": ["Gunsmith 4"], "blueprint": None, "skill": None, "amplified": True})
     used = ({r["out"] for r in recipes} | {n for r in recipes for n, _ in r["in"]} |
             {r["in"] for r in recycle} | {o for r in recycle for o, _ in r["out"]})
     for n in used - set(items):
@@ -180,6 +268,7 @@ def main():
         "fetched": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC"),
         "items": items, "recipes": recipes, "recycle": recycle,
         "upgrades": upgrades, "projects": projects, "quests": quests,
+        "amps": amps, "research": research,
     }
 
     # Jeden rekord na linię: plik da się czytać i porównywać w diffie.
@@ -201,7 +290,8 @@ def main():
     out_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
     print(f"Zapisano {out_path}: {len(items)} przedmiotów, {len(recipes)} przepisów, "
-          f"{len(recycle)} rozbiórek, {len(upgrades)} ulepszeń, {len(projects)} projektów, {len(quests)} questów")
+          f"{len(recycle)} rozbiórek, {len(upgrades)} ulepszeń, {len(projects)} projektów, {len(quests)} questów, "
+          f"{len(amps)} materiałów amplifikacji, {len(research)} kosztów badań")
 
 
 if __name__ == "__main__":

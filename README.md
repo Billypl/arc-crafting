@@ -2,7 +2,7 @@
 
 Przeglądarka zależności craftingu i recyklingu w ARC Raiders, zbudowana na danych z https://arcraiders.wiki/ (Cargo API).
 
-- `fetch_data.py` pobiera dane z wiki i zapisuje je do `data.json`: tabele Cargo oraz amplifikacje broni, które wiki ma tylko w tekście stron Amplified Weapons i Amplified Research (gdy ich parsowanie nic nie znajdzie, zostają poprzednie dane). Uruchom go ponownie po aktualizacji wiki: `python3 fetch_data.py`
+- `fetch_data.py` pobiera dane z wiki i zapisuje je do `data.json`: tabele Cargo oraz amplifikacje broni, które wiki ma tylko w tekście stron Amplified Weapons i Amplified Research (gdy ich parsowanie nic nie znajdzie, zostają poprzednie dane). Źródła łupu (sekcja „Sources”) i punkty badań bierze ze stron przedmiotów, pobieranych hurtem po 50 na zapytanie (ok. 12 zapytań); nagrody z questów i projektów są w Cargo. Uruchom go ponownie po aktualizacji wiki: `python3 fetch_data.py`
 - `index.html` to strona, która czyta `data.json`.
 
 Uruchomienie lokalne (przeglądarka nie wczyta `data.json` z `file://`):

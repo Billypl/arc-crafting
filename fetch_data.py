@@ -67,6 +67,70 @@ def wikitext(page):
         return json.load(r)["parse"]["wikitext"]["*"]
 
 
+def pages_wikitext(titles):
+    """Wikitext wielu stron naraz, po 50 na zapytanie (limit API), zamiast jednego zapytania na stronę.
+    Przekierowania są rozwijane, a wynik jest pod tytułem, o który pytaliśmy."""
+    out, titles = {}, list(titles)
+    for i in range(0, len(titles), 50):
+        chunk = titles[i:i + 50]
+        params = {"action": "query", "format": "json", "formatversion": 2, "prop": "revisions",
+                  "rvprop": "content", "rvslots": "main", "redirects": 1, "titles": "|".join(chunk)}
+        req = urllib.request.Request(API, data=urllib.parse.urlencode(params).encode(), headers={"User-Agent": UA})
+        with urllib.request.urlopen(req, timeout=60) as r:
+            q = json.load(r)["query"]
+        back = {t: t for t in chunk}
+        for k in ("normalized", "redirects"):
+            for m in q.get(k, []):
+                back[m["to"]] = back.get(m["from"], m["from"])
+        for pg in q.get("pages", []):
+            if pg.get("revisions"):
+                out[back.get(pg["title"], pg["title"])] = pg["revisions"][0]["slots"]["main"]["content"]
+        time.sleep(0.5)
+    return out
+
+
+# Pozycje sekcji „Sources”, które strona dokłada sama z innych danych: crafting i recykling mamy z Cargo,
+# nagrody z questów i projektów też (questItems/projectItems z context=reward).
+# Sam link do Research Station przy blueprintach to przepis badawczy, który też jest w Cargo.
+SRC_SKIP = re.compile(r"^(crafting|recycling|salvaging|recycling or salvaging.*|quests?:?|projects?:?"
+                      r"|\[\[Workshop[^\]]*\]\])$", re.I)
+
+
+def clean_src(t):
+    """Jedna pozycja listy źródeł jako zwykły tekst; linki zostają jako [[Cel]] / [[Cel|etykieta]]."""
+    t = re.sub(r"\{\{Price\|([\d,]+)(?:\|([^|}=]+)(?=[|}]))?[^}]*\}\}",
+               lambda m: f"{m.group(1)} {(m.group(2) or 'Coins').strip()}", t)
+    t = re.sub(r"\{\{[^{}]*\}\}", "", t)
+    t = re.sub(r"<br\s*/?>", ", ", t)
+    t = re.sub(r"<[^>]+>", "", t).replace(B3, "").replace("''", "")
+    t = re.sub(r"\[\[(?:File|Plik):[^\]]*\]\]", "", t)
+    t = re.sub(r"\s+", " ", t).strip(" :,")
+    return html.unescape(t)
+
+
+def parse_sources(text):
+    """Sekcja == Sources == jako drzewo [[tekst, [dzieci]], …] (zagnieżdżenie z liczby gwiazdek)."""
+    m = re.search(r"^==\s*Sources?\s*==\s*$(.*?)(?=^==[^=])", text + "\n==", re.S | re.M)
+    if not m:
+        return []
+    root = []
+    stack = [(0, root)]
+    for line in m.group(1).splitlines():
+        lm = re.match(r"^(\*+)\s*(.*)$", line.strip())
+        if not lm:
+            continue
+        depth, t = len(lm.group(1)), clean_src(lm.group(2))
+        while stack[-1][0] >= depth:
+            stack.pop()
+        if not t or (depth == 1 and SRC_SKIP.match(t)):
+            stack.append((depth, []))  # dzieci pominiętej pozycji też pomijamy
+            continue
+        node = [t, []]
+        stack[-1][1].append(node)
+        stack.append((depth, node[1]))
+    return root
+
+
 LINKED = re.compile(r"([\d,]+)\s*\[\[([^\]|#]+)(?:[^\]]*)\]\]")
 TIER = {"Common": "I", "Uncommon": "II", "Rare": "III", "Epic": "IV", "Legendary": "V"}
 B3 = "'" * 3  # pogrubienie w wikitekście
@@ -161,7 +225,7 @@ def main():
 
     print("items…")
     items = {}
-    for r in cargo("items", "name,rarity,type,sellprice,weight,stacksize,raritysort"):
+    for r in cargo("items", "name,rarity,type,sellprice,weight,stacksize,raritysort,location"):
         if not r.get("name"):
             continue
         items[r["name"]] = {
@@ -171,6 +235,9 @@ def main():
             "weight": num(r.get("weight"), float),
             "stack": num(r.get("stacksize")),
         }
+        loc = [x.strip() for x in re.split(r",|<br\s*/?>", r.get("location") or "") if x.strip()]
+        if loc:
+            items[r["name"]]["loc"] = loc
 
     print("crafting…")
     merged = {}
@@ -217,6 +284,16 @@ def main():
               for r in cargo("questItems", "_pageName=quest,context,itemName,qty", where="context='require'")
               if r.get("itemName")]
 
+    print("rewards…")
+    rewards = [{"quest": r.get("quest"), "item": r.get("itemName"), "qty": num(r.get("qty"), default=1),
+                **({"grant": True} if r.get("context") == "grant" else {})}
+               for r in cargo("questItems", "_pageName=quest,context,itemName,qty",
+                              where="context='reward' OR context='grant'") if r.get("itemName")]
+    rewards += [{"project": r.get("projectName"), "stage": num(r.get("stage")), "item": r.get("itemName"),
+                 "qty": num(r.get("qty"), default=1)}
+                for r in cargo("projectItems", "projectName,stage,context,itemName,qty", where="context='reward'")
+                if r.get("itemName")]
+
     # Wpisy z podstron (np. "Użytkownik/Tabela") to brudnopisy, nie prawdziwe przedmioty.
     junk = lambda n: "/" in (n or "")
     recipes = [r for r in recipes if not junk(r["out"]) and not any(junk(n) for n, _ in r["in"])]
@@ -229,36 +306,42 @@ def main():
         for w in category_members(f"Category:{rar} Weapons"):
             weapon_rarity[w] = rar
 
-    # Przedmioty badawcze dają punkty badań; wiki ma to tylko w tekście ich stron ({{Price|1000|Research Points}}).
-    # Gdy strony nie da się pobrać albo nie ma tam liczby, przedmiot zostaje bez tej informacji.
-    print("research items…")
+    # Strony przedmiotów: skąd wypadają (sekcja „Sources”) i, dla przedmiotów badawczych, ile dają punktów badań
+    # ({{Price|1000|Research Points}} albo zwykły tekst „grants 150 Research Points”). Wszystkie strony idą
+    # hurtem, ~12 zapytań. Gdy pobranie się nie uda, zostają poprzednie dane z data.json.
+    print("item pages…")
+    prev = {}
+    try:
+        # Kontener na Pi pisze do data.json.tmp i podmienia plik dopiero po udanym pobraniu,
+        # więc poprzednie dane leżą pod nazwą bez „.tmp”.
+        prev_path = out_path.with_suffix("") if out_path.suffix == ".tmp" else out_path
+        prev = json.loads(prev_path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        pass
+    try:
+        pages = pages_wikitext(items)
+    except Exception as e:  # noqa: BLE001 – źródła to dodatek, nie mogą zatrzymać pobierania
+        print(f"UWAGA: strony przedmiotów: {e}; zostawiam poprzednie źródła i punkty badań.")
+        pages = None
     for n, it in items.items():
-        if it["type"] != "Research Item":
+        if pages is None:
+            old = prev.get("items", {}).get(n, {})
+            it.update({k: old[k] for k in ("src", "rp") if k in old})
             continue
-        try:
-            # Zwykle szablon {{Price|1000|Research Points}}, czasem zwykły tekst „grants 150 Research Points”.
-            m = re.search(r"\{\{Price\|([\d,]+)\|Research Points|grants\s+([\d,]+)\s+\[*Research Points", wikitext(n))
-        except Exception as e:  # noqa: BLE001 – brak tej jednej informacji nie może zatrzymać pobierania
-            print(f"UWAGA: {n}: {e}")
-            continue
-        if m:
-            it["rp"] = num((m.group(1) or m.group(2)).replace(",", ""))
-        time.sleep(0.3)
+        text = pages.get(n, "")
+        src = parse_sources(text)
+        if src:
+            it["src"] = src
+        if it["type"] == "Research Item":
+            m = re.search(r"\{\{Price\|([\d,]+)\|Research Points|grants\s+([\d,]+)\s+\[*Research Points", text)
+            if m:
+                it["rp"] = num((m.group(1) or m.group(2)).replace(",", ""))
 
     # Amplifikacje (broń na poziomie V) są tylko w tekście dwóch stron wiki, nie w Cargo. Gdy parser nic nie
     # znajdzie (ktoś przebudował stronę), bierzemy poprzednie dane z data.json i ostrzegamy, zamiast je zgubić.
     print("amplifications…")
     amps, levels = parse_amplified(wikitext("Amplified Weapons"))
     research = parse_amp_research(wikitext("Amplified Research"))
-    prev = {}
-    if not amps or not research:
-        try:
-            # Kontener na Pi pisze do data.json.tmp i podmienia plik dopiero po udanym pobraniu,
-            # więc poprzednie dane leżą pod nazwą bez „.tmp”.
-            prev_path = out_path.with_suffix("") if out_path.suffix == ".tmp" else out_path
-            prev = json.loads(prev_path.read_text(encoding="utf-8"))
-        except (OSError, ValueError):
-            pass
     if not amps:
         amps = prev.get("amps", [])
         levels = [[r["out"], r["in"][0][0]] for r in prev.get("recipes", []) if r.get("amplified")]
@@ -287,7 +370,7 @@ def main():
         "fetched": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC"),
         "items": items, "recipes": recipes, "recycle": recycle,
         "upgrades": upgrades, "projects": projects, "quests": quests,
-        "amps": amps, "research": research,
+        "amps": amps, "research": research, "rewards": rewards,
     }
 
     # Jeden rekord na linię: plik da się czytać i porównywać w diffie.
@@ -310,7 +393,8 @@ def main():
 
     print(f"Zapisano {out_path}: {len(items)} przedmiotów, {len(recipes)} przepisów, "
           f"{len(recycle)} rozbiórek, {len(upgrades)} ulepszeń, {len(projects)} projektów, {len(quests)} questów, "
-          f"{len(amps)} materiałów amplifikacji, {len(research)} kosztów badań")
+          f"{len(amps)} materiałów amplifikacji, {len(research)} kosztów badań, {len(rewards)} nagród, "
+          f"{sum(1 for it in items.values() if it.get('src'))} przedmiotów ze źródłami")
 
 
 if __name__ == "__main__":

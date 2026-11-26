@@ -250,6 +250,17 @@ svg.dim .me.hv { stroke: var(--raid); stroke-opacity: .9; stroke-width: 1.6; str
 .mi-n { display: flex; gap: 8px; align-items: center; font-family: var(--f-display); font-size: 15px; }
 .mi-f { font-size: 12px; color: var(--muted); }
 .minfo .btn { margin-top: 4px; justify-self: start; }
+/* loot */
+.loot .zones { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 10px 12px 0; }
+.loot .zones .lbl, .ct { font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.loot .zones .lbl { margin-right: 4px; }
+.srclist { padding: 6px 12px 12px; font-size: 14px; }
+.srclist ul { margin: 0; padding-left: 18px; }
+.srclist > ul { padding-left: 16px; }
+.srclist li { margin: 4px 0; }
+.wl { color: var(--ink); text-decoration: underline dotted var(--muted); text-underline-offset: 3px; }
+.wl:hover { color: var(--accent); }
+
 /* calculator */
 .facts .btn { padding: 2px 9px; font-size: 13px; }
 .csearch { flex: 0 1 380px; }
@@ -266,6 +277,11 @@ td.act { width: 1%; white-space: nowrap; text-align: right; }
 tfoot td { background: var(--sunk); color: var(--muted); font-size: 13px; border-top: 1px solid var(--line); border-bottom: 0; }
 tfoot td b { font-family: var(--f-mono); font-weight: 500; color: var(--ink); }
 .surplus { font-size: 12px; color: var(--muted); }
+tr.done td { color: var(--muted); }
+tr.done td b { color: var(--muted); font-weight: 400; }
+input.have { width: 62px; border: 1px solid var(--line); border-radius: 5px; padding: 3px 6px; text-align: right; font-family: var(--f-mono); background: var(--sunk); color: var(--ink); -moz-appearance: textfield; }
+input.have::-webkit-inner-spin-button, input.have::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+input.have:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
 .kept { font-size: 11px; color: var(--muted); border: 1px dashed var(--line); border-radius: 3px; padding: 0 5px; margin-left: 6px; }
 @media (prefers-reduced-motion: reduce) { .tw { transition: none; } .e, .n, .elab { transition: none; } }
 @media (max-width: 560px) { .search kbd { display: none; } .tab { padding-inline: 10px; font-size: 14px; } }
@@ -318,7 +334,7 @@ const store = {
 
 let D, ITEMS = {}, byOut = new Map(), byIn = new Map(), recTo = new Map(), recFrom = new Map(),
     ups = new Map(), projs = new Map(), quests = new Map(), NAMES = [], SLUG = new Map(),
-    ampUse = new Map(), ampOf = new Map(), resUse = new Map(), resBy = new Map();
+    ampUse = new Map(), ampOf = new Map(), resUse = new Map(), resBy = new Map(), rewards = new Map();
 let cur = null, tab = "uses";
 const opt = Object.assign({ recycling: true, salvaging: true, depth: 2, sort: "per", best: true, raid: false }, store.get("arc-opt", {}));
 let showAll = false, treeFilter = "";
@@ -363,6 +379,7 @@ function init(data) {
   for (const p of data.projects) push(projs, p.item, p);
   for (const q of data.quests) push(quests, q.item, q);
   for (const a of data.amps || []) { push(ampUse, a.item, a); push(ampOf, a.weapon, a); }
+  for (const r of data.rewards || []) push(rewards, r.item, r);
   for (const r of data.research || []) { push(resUse, r.item, r); push(resBy, r.project, r); push(resBy, "→" + r.unlocks, r); }
   const all = new Set([...byOut.keys(), ...byIn.keys(), ...recFrom.keys(), ...recTo.keys(), ...ups.keys(), ...projs.keys(), ...quests.keys(), ...ampUse.keys(), ...ampOf.keys(), ...resUse.keys()]);
   LONE = new Set(Object.keys(ITEMS).filter(n => !all.has(n)));
@@ -370,7 +387,7 @@ function init(data) {
   for (const n of NAMES) SLUG.set(slug(n), n);
   $("#stamp").textContent = `dane z wiki: ${data.fetched}`;
   renderFilters();
-  $("#foot").innerHTML = `Źródło: <a href="${esc(data.source)}" target="_blank" rel="noopener">ARC Raiders Wiki</a> (Cargo: crafting, recycling, workshopUpgrades, projectItems, questItems; amplifikacje ze stron Amplified Weapons i Amplified Research). ${NAMES.length} przedmiotów, ${data.recipes.length} przepisów, ${data.recycle.length} wpisów recyklingu. Pobrano ${esc(data.fetched)}.`;
+  $("#foot").innerHTML = `Źródło: <a href="${esc(data.source)}" target="_blank" rel="noopener">ARC Raiders Wiki</a> (Cargo: items, crafting, recycling, workshopUpgrades, projectItems, questItems; źródła łupu z sekcji „Sources” stron przedmiotów; amplifikacje ze stron Amplified Weapons i Amplified Research). ${NAMES.length} przedmiotów, ${data.recipes.length} przepisów, ${data.recycle.length} wpisów recyklingu. Pobrano ${esc(data.fetched)}.`;
   route();
 }
 
@@ -502,7 +519,7 @@ function summaryCard() {
     </div>`);
   }
   if (!secs.length) {
-    return `<aside class="card scard slim" aria-label="Podsumowanie"><div class="sc-sec"><span class="sc-none"><b>${esc(cur)}</b> nie da się ani wytworzyć, ani rozłożyć. ${LONE.has(cur) ? "Nie jest też potrzebny w żadnym przepisie, ulepszeniu, projekcie, queście ani amplifikacji." : recTo.has(cur) ? "To surowiec bazowy: wypada jako łup albo z recyklingu innych przedmiotów (zakładka „Jak zdobyć”)." : "To surowiec bazowy: wypada tylko jako łup."}${ITEMS[cur] && ITEMS[cur].rp ? ` Daje <b>${fmt(ITEMS[cur].rp)} Research Points</b>.` : ""}</span></div></aside>`;
+    return `<aside class="card scard slim" aria-label="Podsumowanie"><div class="sc-sec"><span class="sc-none"><b>${esc(cur)}</b> nie da się ani wytworzyć, ani rozłożyć. ${LONE.has(cur) ? "Nie jest też potrzebny w żadnym przepisie, ulepszeniu, projekcie, queście ani amplifikacji." : recTo.has(cur) ? "To surowiec bazowy: wypada jako łup albo z recyklingu innych przedmiotów (zakładka „Jak zdobyć”)." : `To surowiec bazowy: wypada tylko jako łup${ITEMS[cur] && (ITEMS[cur].src || ITEMS[cur].loc) ? " (gdzie szukać: zakładka „Jak zdobyć”)" : ""}.`}${ITEMS[cur] && ITEMS[cur].rp ? ` Daje <b>${fmt(ITEMS[cur].rp)} Research Points</b>.` : ""}</span></div></aside>`;
   }
   if (!recs.length) secs.unshift(`<div class="sc-sec"><h3>Craft z</h3><span class="sc-none">Nie da się wytworzyć.</span></div>`);
   if (!rows.length) secs.push(`<div class="sc-sec"><h3>Rozkłada się na</h3><span class="sc-none">Nie da się rozłożyć.</span></div>`);
@@ -692,7 +709,42 @@ function renderSources() {
     </div>
     <div class="legend"><span><span class="tg recycling">baza</span> recykling w bazie (pełny uzysk)</span><span><span class="tg salvaging">rajd</span> rozbiórka w trakcie rajdu (mniejszy uzysk)</span><span><b>na 100 wart.</b> uzysk na każde 100 wartości sprzedażnej, którą tracisz, rozkładając przedmiot</span><span><b>na 1 kg</b> uzysk na kilogram miejsca w plecaku</span></div>
   </div>`;
-  return { html: craftSection() + recycleSec, count: srcCount + (byOut.get(cur) || []).length };
+  const loot = lootSection();
+  return { html: craftSection() + loot.html + recycleSec, count: srcCount + (byOut.get(cur) || []).length + loot.count };
+}
+
+/* ---------- loot, traders, rewards ---------- */
+// Sekcja „Sources” ze strony wiki jako drzewo. Linki prowadzą do Atlasu, gdy znamy przedmiot, a w pozostałych
+// przypadkach (pojemniki, wrogowie, handlarze, mapy) do wiki.
+const SRC_PL = [[/^Scavenging$/i, "Łup w rajdzie"], [/^Harvesting$/i, "Zbieranie roślin"], [/^Sold by /i, "Sprzedaje "]];
+function srcText(t) {
+  for (const [re, pl] of SRC_PL) t = t.replace(re, pl);
+  let out = "", last = 0;
+  for (const m of t.matchAll(/\[\[([^\]|#]+)(?:#[^\]|]*)?(?:\|([^\]]*))?\]\]/g)) {
+    out += esc(t.slice(last, m.index));
+    const target = m[1].trim(), label = (m[2] || m[1]).trim();
+    out += SLUG.get(slug(target)) === target ? link(target)
+      : `<a class="wl" href="https://arcraiders.wiki/wiki/${encodeURIComponent(target.replace(/ /g, "_"))}" target="_blank" rel="noopener">${esc(label)}</a>`;
+    last = m.index + m[0].length;
+  }
+  return out + esc(t.slice(last));
+}
+const srcTree = list => `<ul>${list.map(([t, kids]) => `<li>${srcText(t)}${kids.length ? srcTree(kids) : ""}</li>`).join("")}</ul>`;
+function lootSection() {
+  const it = ITEMS[cur] || {}, src = it.src || [], loc = it.loc || [], rw = rewards.get(cur) || [];
+  if (!src.length && !loc.length && !rw.length) return { html: "", count: 0 };
+  const cards = [];
+  if (src.length || loc.length) cards.push(`<div class="card loot">
+    <div class="recipe-h"><span class="ttl">Gdzie znaleźć i kupić</span><span class="note">według strony na wiki</span></div>
+    ${loc.length ? `<div class="zones"><span class="lbl">Strefy łupu</span>${loc.map(z => `<span class="chip">${esc(z)}</span>`).join("")}</div>` : ""}
+    ${src.length ? `<div class="srclist">${srcTree(src)}</div>` : ""}</div>`);
+  if (rw.length) {
+    const rows = [...rw].sort((a, b) => b.qty - a.qty || (a.quest || a.project).localeCompare(b.quest || b.project)).map(r => `<tr><td class="num"><b>${fmt(r.qty)}×</b></td>
+      <td>${r.quest ? `<span class="ct">quest</span> ${esc(r.quest)}` : `<span class="ct">projekt</span> ${esc(r.project)}${r.stage ? `, etap ${r.stage}` : ""}`}${r.grant ? `<div class="by">dostajesz na start zadania, do jego wykonania</div>` : ""}</td></tr>`).join("");
+    cards.push(`<div class="card"><div class="recipe-h"><span class="ttl">Nagrody</span><span class="note">${rw.length} ${rw.length === 1 ? "źródło" : "źródeł"}</span></div>
+      <div class="tblwrap"><table><thead><tr><th class="num">Ile</th><th>Za co</th></tr></thead><tbody>${rows}</tbody></table></div></div>`);
+  }
+  return { html: `<div class="sec"><h2>Łup, handel i nagrody</h2><div class="cgrid">${cards.join("")}</div></div>`, count: src.length + rw.length };
 }
 
 /* ---------- crafting down ---------- */
@@ -1204,20 +1256,21 @@ function drawMap() {
 }
 
 /* ---------- calculator ---------- */
-// list: [nazwa, ile sztuk] do wytworzenia; keep: przedmioty, których nie rozpisujemy (masz je albo kupisz),
-// więc trafiają do surowców jak każdy inny składnik.
-const CALC = Object.assign({ list: [], keep: [] }, store.get("arc-calc", {}));
+// list: [nazwa, ile sztuk] do wytworzenia.
+// have: {nazwa: ile masz} na dowolnym poziomie; zapas półproduktu zmniejsza liczbę craftów, a więc i wszystko pod nim.
+// keep: przedmioty, których nie craftujesz, tylko zdobywasz gotowe (łup, handel), więc trafiają do listy „Do zdobycia”.
+const CALC = Object.assign({ list: [], keep: [], have: {} }, store.get("arc-calc", {}));
 const saveCalc = () => store.set("arc-calc", CALC);
 function calcAdd(n, q) {
   const row = CALC.list.find(x => x[0] === n);
   if (row) row[1] += q; else CALC.list.push([n, q]);
   saveCalc();
 }
-// Rozpisuje listę od zera: każdy półprodukt w pełnych craftach (przepis dający 3 szt. przy potrzebie 4 to 2 crafty).
+// Rozpisuje listę: każdy półprodukt w pełnych craftach (przepis dający 3 szt. przy potrzebie 4 to 2 crafty).
 // Przedmioty idą od wyników w dół (porządek topologiczny), więc zapotrzebowanie na półprodukt jest już pełne,
-// zanim policzymy jego crafty.
+// zanim odejmiemy zapas i policzymy crafty. Poziom to odległość od celu (cele = 0), do wcięć w tabeli.
 function calcRun() {
-  const keep = new Set(CALC.keep);
+  const keep = new Set(CALC.keep), have = CALC.have;
   const rec = n => keep.has(n) ? null : recipe(n);
   const order = [], state = new Map();
   const visit = n => {
@@ -1228,22 +1281,27 @@ function calcRun() {
   };
   for (const [n] of CALC.list) visit(n);
   order.reverse();
-  const need = new Map();
-  for (const [n, q] of CALC.list) need.set(n, (need.get(n) || 0) + q);
+  const need = new Map(), lvl = new Map();
+  for (const [n, q] of CALC.list) { need.set(n, (need.get(n) || 0) + q); lvl.set(n, 0); }
   const crafts = [], raw = [];
   for (const n of order) {
     const q = need.get(n); if (!q) continue;
+    const own = Math.min(have[n] || 0, q), rest = q - own;
     const r = rec(n);
-    if (!r) { raw.push([n, q]); continue; }
-    const k = Math.ceil(q / r.qty - 1e-9);
-    crafts.push({ n, need: q, k, made: k * r.qty, r });
-    for (const [m, c] of r.in) need.set(m, (need.get(m) || 0) + k * c);
+    if (!r) { raw.push({ n, need: q, own, rest }); continue; }
+    const k = Math.ceil(rest / r.qty - 1e-9);
+    crafts.push({ n, need: q, own, rest, k, made: k * r.qty, r, lvl: lvl.get(n) || 0 });
+    for (const [m, c] of r.in) {
+      need.set(m, (need.get(m) || 0) + k * c);
+      lvl.set(m, Math.max(lvl.get(m) ?? 0, (lvl.get(n) || 0) + 1));
+    }
   }
-  raw.sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+  raw.sort((a, b) => b.rest - a.rest || b.need - a.need || a.n.localeCompare(b.n));
   return { crafts: crafts.reverse(), raw };
 }
+const haveInput = (n, need) => `<input class="have" type="number" min="0" step="1" value="${CALC.have[n] || ""}" placeholder="0" data-have="${esc(n)}" aria-label="Ile masz ${esc(n)}" title="Ile już masz (z ${fmt(need)} potrzebnych)">`;
 function renderCalc() {
-  const L = CALC.list, keep = new Set(CALC.keep);
+  const L = CALC.list, keep = new Set(CALC.keep), hasHave = Object.keys(CALC.have).length > 0;
   const canAdd = byOut.has(cur) && !L.some(x => x[0] === cur);
   const controls = `<div class="controls">
       <div class="search csearch"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path></svg>
@@ -1251,10 +1309,11 @@ function renderCalc() {
         <ul id="csugg" class="sugg" role="listbox" hidden></ul></div>
       ${canAdd ? `<button class="btn" id="ccur">+ ${esc(cur)}</button>` : ""}
       ${raidToggle([...L.map(x => x[0])])}
-      ${L.length || keep.size ? `<button class="btn" id="cclear">Wyczyść wszystko</button>` : ""}
+      ${hasHave ? `<button class="btn" id="chave">Wyzeruj „mam”</button>` : ""}
+      ${L.length || keep.size || hasHave ? `<button class="btn" id="cclear">Wyczyść wszystko</button>` : ""}
     </div>`;
   const head = `<h2>Kalkulator craftingu</h2>
-    <p class="sub">Dodaj przedmioty i ile sztuk chcesz mieć. Kalkulator rozpisze, ile razy craftować każdy półprodukt i ile surowców zebrać, licząc od zera. Przepis dający kilka sztuk naraz liczy się w pełnych craftach. Ulepszenia broni obejmują poprzednie poziomy, więc Tempest IV zawiera też koszt Tempest I–III.</p>`;
+    <p class="sub">Dodaj przedmioty i ile sztuk chcesz mieć. Kalkulator rozpisze każdy poziom: ile craftować półproduktów i ile surowców zebrać. W kolumnie „mam” wpisz, co już masz, na dowolnym poziomie: zapas półproduktu zmniejsza też wszystko pod nim. „Zdobędę gotowe” przenosi półprodukt do listy do zdobycia, np. gdy Explosive Compound łatwiej znaleźć, niż zrobić. Przepis dający kilka sztuk naraz liczy się w pełnych craftach.</p>`;
   if (!L.length) return `<div class="sec">${head}${controls}<div class="card empty">Lista jest pusta. Wyszukaj przedmiot powyżej albo otwórz go i kliknij „+ do kalkulatora”.</div></div>`;
   const { crafts, raw } = calcRun();
   const targets = `<div class="card"><div class="recipe-h"><span class="ttl">Chcę wytworzyć</span></div><div class="tblwrap"><table>
@@ -1264,31 +1323,55 @@ function renderCalc() {
       <td>${r ? stations(r) : ""}</td><td class="act"><button class="btn sm" data-del="${i}" aria-label="Usuń ${esc(n)}">usuń</button></td></tr>`; }).join("")}
     </tbody></table></div></div>`;
   let wt = 0, val = 0, wOk = true, vOk = true;
-  for (const [n, q] of raw) { const it = ITEMS[n] || {}; if (it.weight == null) wOk = false; else wt += it.weight * q; if (it.value == null) vOk = false; else val += it.value * q; }
-  const rawT = `<div class="card"><div class="recipe-h"><span class="ttl">Surowce do zebrania</span><span class="note">${raw.length} rodzajów</span></div><div class="tblwrap"><table>
-    <thead><tr><th class="num">Ile</th><th>Przedmiot</th><th class="num">Waga</th><th></th></tr></thead><tbody>
-    ${raw.map(([n, q]) => { const it = ITEMS[n] || {}; return `<tr><td class="num"><b>${fmt(q)}×</b></td><td>${link(n)}${keep.has(n) ? `<span class="kept">masz / kupisz</span>` : ""} ${needBadges(n)}</td>
-      <td class="num">${it.weight != null ? fmt(it.weight * q) + " kg" : "—"}</td>
-      <td class="act">${keep.has(n) ? `<button class="btn sm" data-unkeep="${esc(n)}">rozpisz</button>` : ""}</td></tr>`; }).join("")}
-    </tbody><tfoot><tr><td colspan="4">razem waga <b>${wOk ? "" : "≥ "}${fmt(wt)} kg</b> · wartość surowców <b>${vOk ? "" : "≥ "}${fmt(val)}</b></td></tr></tfoot></table></div></div>`;
-  const craftT = `<div class="card"><div class="recipe-h"><span class="ttl">Kolejność craftowania</span><span class="note">od składników do gotowych przedmiotów</span></div><div class="tblwrap"><table>
-    <thead><tr><th class="num">Craftów</th><th>Przedmiot</th><th>Stół</th><th></th></tr></thead><tbody>
-    ${crafts.map(c => `<tr><td class="num"><b>${c.k}×</b></td><td>${link(c.n)} ${bp(c.r)}${c.made > c.need ? `<div class="surplus">daje ${c.made} szt., potrzeba ${fmt(c.need)} (+${fmt(c.made - c.need)} zapasu)</div>` : c.r.qty > 1 ? `<div class="surplus">daje ${c.made} szt.</div>` : ""}</td>
+  for (const x of raw) { const it = ITEMS[x.n] || {}; if (it.weight == null) wOk = false; else wt += it.weight * x.rest; if (it.value == null) vOk = false; else val += it.value * x.rest; }
+  const left = raw.filter(x => x.rest > 0).length;
+  const rawT = `<div class="card"><div class="recipe-h"><span class="ttl">Do zdobycia</span><span class="note">${left ? `brakuje ${left} z ${raw.length} rodzajów` : "masz wszystko"}</span></div><div class="tblwrap"><table>
+    <thead><tr><th class="num">Brakuje</th><th>Przedmiot</th><th class="num">Mam</th><th class="num">Waga</th><th></th></tr></thead><tbody>
+    ${raw.map(x => { const it = ITEMS[x.n] || {}; return `<tr class="${x.rest ? "" : "done"}"><td class="num"><b>${fmt(x.rest)}×</b>${x.own ? `<div class="surplus">z ${fmt(x.need)}</div>` : ""}</td>
+      <td>${link(x.n)}${keep.has(x.n) ? `<span class="kept">gotowy, bez craftu</span>` : ""} ${needBadges(x.n)}</td>
+      <td class="num">${haveInput(x.n, x.need)}</td>
+      <td class="num">${it.weight != null ? fmt(it.weight * x.rest) + " kg" : "—"}</td>
+      <td class="act">${keep.has(x.n) ? `<button class="btn sm" data-unkeep="${esc(x.n)}" title="Wróć do craftowania tego przedmiotu">craftuj</button>` : ""}</td></tr>`; }).join("")}
+    </tbody><tfoot><tr><td colspan="5">brakujące razem: waga <b>${wOk ? "" : "≥ "}${fmt(wt)} kg</b> · wartość <b>${vOk ? "" : "≥ "}${fmt(val)}</b></td></tr></tfoot></table></div></div>`;
+  const craftT = `<div class="card"><div class="recipe-h"><span class="ttl">Kolejność craftowania</span><span class="note">od składników do gotowych przedmiotów; wcięcie = poziom pod celem</span></div><div class="tblwrap"><table>
+    <thead><tr><th class="num">Craftów</th><th>Przedmiot</th><th class="num">Mam</th><th>Stół</th><th></th></tr></thead><tbody>
+    ${crafts.map(c => { const note = [];
+      if (c.own) note.push(c.rest ? `potrzeba ${fmt(c.need)}, masz ${fmt(c.own)}` : `masz wszystkie ${fmt(c.need)}, nie craftujesz`);
+      if (c.made > c.rest) note.push(`daje ${c.made} szt., potrzeba ${fmt(c.rest)} (+${fmt(c.made - c.rest)} zapasu)`);
+      else if (c.r.qty > 1 && c.k) note.push(`daje ${c.made} szt.`);
+      return `<tr class="${c.k ? "" : "done"}"><td class="num"><b>${c.k}×</b></td><td><div style="padding-left:${Math.min(c.lvl, 6) * 14}px">${link(c.n)} ${bp(c.r)}${note.length ? `<div class="surplus">${note.join(" · ")}</div>` : ""}</div></td>
+      <td class="num">${c.lvl ? haveInput(c.n, c.need) : ""}</td>
       <td>${stations(c.r)}</td>
-      <td class="act"><button class="btn sm" data-keep="${esc(c.n)}" title="Nie rozpisuj: potraktuj jako surowiec, bo już go masz albo kupisz">mam</button></td></tr>`).join("")}
+      <td class="act">${c.lvl ? `<button class="btn sm" data-keep="${esc(c.n)}" title="Nie craftuj: zdobędziesz gotowy (łup, handel), więc trafi do listy „Do zdobycia”">zdobędę gotowe</button>` : ""}</td></tr>`; }).join("")}
     </tbody></table></div></div>`;
-  return `<div class="sec">${head}${controls}<div style="display:grid;gap:16px">${targets}<div class="cgrid">${rawT}${craftT}</div></div></div>`;
+  return `<div class="sec">${head}${controls}<div style="display:grid;gap:16px">${targets}${rawT}${craftT}</div></div>`;
 }
 function bindCalc() {
   const P = $("#panel"), again = () => { saveCalc(); render(); };
   bindRaid();
   const cc = $("#ccur"); if (cc) cc.onclick = () => { calcAdd(cur, 1); again(); };
-  const cl = $("#cclear"); if (cl) cl.onclick = () => { CALC.list = []; CALC.keep = []; again(); };
+  const cl = $("#cclear"); if (cl) cl.onclick = () => { CALC.list = []; CALC.keep = []; CALC.have = {}; again(); };
+  const ch = $("#chave"); if (ch) ch.onclick = () => { CALC.have = {}; again(); };
   P.querySelectorAll("[data-step]").forEach(b => b.onclick = () => { const row = CALC.list[+b.dataset.step]; row[1] = Math.max(1, row[1] + +b.dataset.d); again(); });
   P.querySelectorAll("[data-qty]").forEach(inp => inp.onchange = () => { const v = Math.round(+inp.value); if (v >= 1) CALC.list[+inp.dataset.qty][1] = v; again(); });
   P.querySelectorAll("[data-del]").forEach(b => b.onclick = () => { CALC.list.splice(+b.dataset.del, 1); again(); });
   P.querySelectorAll("[data-keep]").forEach(b => b.onclick = () => { CALC.keep.push(b.dataset.keep); again(); });
   P.querySelectorAll("[data-unkeep]").forEach(b => b.onclick = () => { CALC.keep = CALC.keep.filter(n => n !== b.dataset.unkeep); again(); });
+  // Po zmianie „mam” przerysowujemy tabelę i wracamy kursorem do tego samego pola (Tab przechodzi dalej).
+  P.querySelectorAll("[data-have]").forEach(inp => inp.onchange = () => {
+    const n = inp.dataset.have, v = Math.max(0, Math.round(+inp.value || 0));
+    if (v) CALC.have[n] = v; else delete CALC.have[n];
+    saveCalc();
+    // change przychodzi przed przeniesieniem fokusu, więc czekamy, aż Tab/klik wskaże następny element,
+    // i po przerysowaniu ustawiamy fokus na jego odpowiedniku (pole „mam” albo przycisk w tym samym wierszu).
+    setTimeout(() => {
+      const a = document.activeElement, ds = a && P.contains(a) ? a.dataset : {};
+      const attr = ["have", "keep", "unkeep"].find(k => ds[k] != null);
+      render();
+      const el = attr && P.querySelector(`[data-${attr}="${CSS.escape(ds[attr])}"]`);
+      if (el) { el.focus(); if (el.select) el.select(); }
+    }, 0);
+  });
   // wyszukiwarka tylko wśród przedmiotów, które da się wytworzyć
   const inp = $("#cq"), ul = $("#csugg"); let hs = [], act = 0;
   const paint = () => ul.querySelectorAll("li").forEach((li, i) => li.setAttribute("aria-selected", String(i === act)));

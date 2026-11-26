@@ -237,7 +237,10 @@ def main():
     prev = {}
     if not amps or not research:
         try:
-            prev = json.loads(out_path.read_text(encoding="utf-8"))
+            # Kontener na Pi pisze do data.json.tmp i podmienia plik dopiero po udanym pobraniu,
+            # więc poprzednie dane leżą pod nazwą bez „.tmp”.
+            prev_path = out_path.with_suffix("") if out_path.suffix == ".tmp" else out_path
+            prev = json.loads(prev_path.read_text(encoding="utf-8"))
         except (OSError, ValueError):
             pass
     if not amps:

@@ -174,12 +174,17 @@ def parse_amp_research(text):
         un = re.search(r"^\|\s*(?!valign)([^|\n][^\n]*)$", part, re.M)
         step2 = part.split("Step 2 =", 1)[1].split("</tabber>", 1)[0] if "Step 2 =" in part else ""
         items = LINKED.findall(step2)
+        # Krok 1: zadanie do wykonania (lista punktów, czasem z dopiskiem w nawiasie, np. „(In one round)”).
+        step1 = part.split("Step 1 =", 1)[1].split("|-|", 1)[0] if "Step 1 =" in part else ""
+        task = [clean_src(re.sub(r"^\*+\s*", "", ln.strip())) for ln in step1.splitlines() if ln.strip()]
+        task = [t for t in task if t]
         rp = re.search(r"\*\s*([\d,]+)\s+Research Points", step2)
         if rp:
             items.append((rp.group(1), "Research Points"))
         for qty, item in items:
             out.append({"project": name, "unlocks": un.group(1).strip() if un else None,
-                        "item": item.strip(), "qty": num(qty.replace(",", ""), default=1)})
+                        "item": item.strip(), "qty": num(qty.replace(",", ""), default=1),
+                        **({"task": task} if task else {})})
     return out
 
 

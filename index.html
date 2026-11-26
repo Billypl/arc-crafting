@@ -79,6 +79,7 @@ button, input, select { font: inherit; color: inherit; }
 .fchip[aria-pressed="false"]::before { background: transparent; border-color: var(--muted); }
 
 /* rarity */
+.dot.amp { background: var(--accent); border-radius: 50%; transform: none; }
 .dot { width: 9px; height: 9px; border-radius: 2px; flex: none; display: inline-block; background: var(--r-common); transform: rotate(45deg); }
 .rar-uncommon { --rc: var(--r-uncommon); } .rar-rare { --rc: var(--r-rare); } .rar-epic { --rc: var(--r-epic); }
 .rar-legendary { --rc: var(--r-legendary); } .rar-amplified { --rc: var(--r-amplified); } .rar-common, .rar-none { --rc: var(--r-common); }
@@ -250,6 +251,14 @@ svg.dim .me.hv { stroke: var(--raid); stroke-opacity: .9; stroke-width: 1.6; str
 .mi-n { display: flex; gap: 8px; align-items: center; font-family: var(--f-display); font-size: 15px; }
 .mi-f { font-size: 12px; color: var(--muted); }
 .minfo .btn { margin-top: 4px; justify-self: start; }
+/* amplification page */
+.astep .recipe-h .ttl b { font-weight: 700; }
+.num-b { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: var(--surface); font-family: var(--f-mono); font-size: 12px; font-weight: 600; }
+.task { margin: 0; padding: 8px 12px 12px 34px; font-size: 14px; }
+.task li { margin: 4px 0; }
+.task .tnote { list-style: none; margin-left: -16px; color: var(--muted); font-style: italic; }
+.acost { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; padding: 10px 12px 12px; font-size: 14px; }
+
 /* loot */
 .loot .zones { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 10px 12px 0; }
 .loot .zones .lbl, .ct { font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
@@ -292,7 +301,7 @@ input.have:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
     <div class="brand">ARC Crafting Atlas<small id="stamp">wczytywanie danych…</small></div>
     <div class="search" role="combobox" aria-expanded="false" aria-haspopup="listbox" aria-owns="sugg">
       <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path></svg>
-      <input id="q" type="text" autocomplete="off" spellcheck="false" placeholder="Szukaj przedmiotu, np. Chemicals, Deadline, Wires…" aria-autocomplete="list" aria-controls="sugg">
+      <input id="q" type="text" autocomplete="off" spellcheck="false" placeholder="Szukaj przedmiotu lub amplifikacji, np. Chemicals, Deadline, X-Rounds…" aria-autocomplete="list" aria-controls="sugg">
       <kbd>/</kbd>
       <ul id="sugg" class="sugg" role="listbox" hidden></ul>
     </div>
@@ -334,7 +343,9 @@ const store = {
 
 let D, ITEMS = {}, byOut = new Map(), byIn = new Map(), recTo = new Map(), recFrom = new Map(),
     ups = new Map(), projs = new Map(), quests = new Map(), NAMES = [], SLUG = new Map(),
-    ampUse = new Map(), ampOf = new Map(), resUse = new Map(), resBy = new Map(), rewards = new Map();
+    ampUse = new Map(), ampOf = new Map(), resUse = new Map(), resBy = new Map(), rewards = new Map(),
+    AMPS = new Map(), AMPSLUG = new Map(); // amplifikacja -> wpisy z data.amps; slug -> nazwa
+let ampCur = null; // otwarta karta amplifikacji (zamiast przedmiotu)
 let cur = null, tab = "uses";
 const opt = Object.assign({ recycling: true, salvaging: true, depth: 2, sort: "per", best: true, raid: false }, store.get("arc-opt", {}));
 let showAll = false, treeFilter = "";
@@ -380,6 +391,9 @@ function init(data) {
   for (const q of data.quests) push(quests, q.item, q);
   for (const a of data.amps || []) { push(ampUse, a.item, a); push(ampOf, a.weapon, a); }
   for (const r of data.rewards || []) push(rewards, r.item, r);
+  for (const a of data.amps || []) push(AMPS, a.amp, a);
+  for (const r of data.research || []) if (r.unlocks && !AMPS.has(r.unlocks)) AMPS.set(r.unlocks, []);
+  for (const a of AMPS.keys()) AMPSLUG.set("amp-" + slug(a), a);
   for (const r of data.research || []) { push(resUse, r.item, r); push(resBy, r.project, r); push(resBy, "→" + r.unlocks, r); }
   const all = new Set([...byOut.keys(), ...byIn.keys(), ...recFrom.keys(), ...recTo.keys(), ...ups.keys(), ...projs.keys(), ...quests.keys(), ...ampUse.keys(), ...ampOf.keys(), ...resUse.keys()]);
   LONE = new Set(Object.keys(ITEMS).filter(n => !all.has(n)));
@@ -451,6 +465,8 @@ function desc(n) {
 /* ---------- routing ---------- */
 function route() {
   const s = decodeURIComponent(location.hash.slice(1));
+  ampCur = AMPSLUG.get(s) || null;
+  if (ampCur) { if (!cur) cur = SLUG.get("chemicals") || NAMES[0]; render(); window.scrollTo({ top: 0 }); return; }
   const n = SLUG.get(s) || (cur ? cur : (SLUG.get("chemicals") || NAMES[0]));
   if (n !== cur) { cur = n; showAll = false; treeFilter = ""; }
   render();
@@ -558,6 +574,7 @@ function usesList(n, cum, depth, path, f, autoOpen) {
 }
 /* ---------- amplifications (weapons at level V) ---------- */
 // Badanie odblokowujące amplifikację: po nazwie projektu, a gdy wiki ma w niej literówkę, po tym, co odblokowuje.
+const ampLink = a => AMPS.has(a) ? `<a class="wl" href="#amp-${slug(a)}">${esc(a)}</a>` : esc(a);
 const resFor = a => (a.research && resBy.get(a.research)) || resBy.get("→" + a.amp) || [];
 const costLine = list => list.map(x => `<span class="nw"><b>${fmt(x.qty)}×</b> ${x.item === "Research Points" ? esc(x.item) : link(x.item)}</span>`).join(" ");
 function resCell(a) {
@@ -570,19 +587,19 @@ function ampSection() {
   const uses = ampUse.get(cur) || [];
   if (uses.length) out.push(`<div class="card"><div class="recipe-h"><span class="ttl">Amplifikacje broni</span><span class="note">materiał do amplifikacji broni na poziomie V</span></div><div class="tblwrap"><table>
     <thead><tr><th class="num">Ile</th><th>Broń</th><th>Amplifikacja</th><th>Najpierw badanie</th><th>Wymaga</th></tr></thead><tbody>
-    ${uses.map(a => `<tr><td class="num"><b>${a.qty}×</b></td><td>${link(a.weapon)}</td><td>${esc(a.amp)}</td><td>${resCell(a)}</td><td>${a.requires ? esc(a.requires) : "—"}</td></tr>`).join("")}
+    ${uses.map(a => `<tr><td class="num"><b>${a.qty}×</b></td><td>${link(a.weapon)}</td><td>${ampLink(a.amp)}</td><td>${resCell(a)}</td><td>${a.requires ? ampLink(a.requires) : "—"}</td></tr>`).join("")}
     </tbody></table></div></div>`);
   const res = cur === "Research Points" ? [] : resUse.get(cur) || [];
   if (res.length) out.push(`<div class="card"><div class="recipe-h"><span class="ttl">Badania amplifikacji</span><span class="note">Research Station 4, krok 2 projektu</span></div><div class="tblwrap"><table>
     <thead><tr><th class="num">Ile</th><th>Projekt badawczy</th><th>Odblokowuje</th><th>Pełny koszt</th></tr></thead><tbody>
-    ${res.map(r => `<tr><td class="num"><b>${fmt(r.qty)}×</b></td><td>${esc(r.project)}</td><td>${esc(r.unlocks || "—")}</td><td>${costLine(resBy.get(r.project))}</td></tr>`).join("")}
+    ${res.map(r => `<tr><td class="num"><b>${fmt(r.qty)}×</b></td><td>${esc(r.project)}</td><td>${r.unlocks ? ampLink(r.unlocks) : "—"}</td><td>${costLine(resBy.get(r.project))}</td></tr>`).join("")}
     </tbody></table></div></div>`);
   const own = ampOf.get(cur) || [];
   if (own.length) {
     const by = new Map(); for (const a of own) push(by, a.amp, a);
     out.push(`<div class="card"><div class="recipe-h"><span class="ttl">Amplifikacje tej broni</span><span class="note">po ulepszeniu do poziomu V; wybranej amplifikacji nie da się potem zmienić</span></div><div class="tblwrap"><table>
       <thead><tr><th>Amplifikacja</th><th>Materiały</th><th>Najpierw badanie</th><th>Wymaga</th></tr></thead><tbody>
-      ${[...by].map(([amp, list]) => `<tr><td>${esc(amp)}</td><td>${costLine(list)}</td><td>${resCell(list[0])}</td><td>${list[0].requires ? esc(list[0].requires) : "—"}</td></tr>`).join("")}
+      ${[...by].map(([amp, list]) => `<tr><td>${ampLink(amp)}</td><td>${costLine(list)}</td><td>${resCell(list[0])}</td><td>${list[0].requires ? ampLink(list[0].requires) : "—"}</td></tr>`).join("")}
       </tbody></table></div></div>`);
   }
   return out.length ? `<div class="sec"><h2>Amplifikacje</h2><p class="sub">Z wiki (strony Amplified Weapons i Amplified Research). Amplifikacje wymagają Gunsmith 4 i Research Station 4.</p><div style="display:grid;gap:12px">${out.join("")}</div></div>` : "";
@@ -713,6 +730,49 @@ function renderSources() {
   return { html: craftSection() + loot.html + recycleSec, count: srcCount + (byOut.get(cur) || []).length + loot.count };
 }
 
+/* ---------- amplification page ---------- */
+// Wszystko o jednej amplifikacji w kolejności, w jakiej się ją zdobywa: zadanie (krok 1 badania),
+// koszt badania (krok 2), potem materiały na każdą broń V, na którą pasuje.
+function renderAmpPage() {
+  const name = ampCur, list = AMPS.get(name) || [];
+  const res = (list.length ? resFor(list[0]) : []).length ? resFor(list[0]) : (resBy.get("→" + name) || []);
+  const project = res.length ? res[0].project : (list.find(a => a.research) || {}).research;
+  const task = (res.find(r => r.task) || {}).task || [];
+  const needs = new Set(list.map(a => a.requires).filter(Boolean));
+  const ledTo = [...AMPS].filter(([, l]) => l.some(a => a.requires === name)).map(([n]) => n);
+  $("#head").className = "head rar-none";
+  $("#head").innerHTML = `<div class="hinfo">
+    <div class="kicker"><span class="dot amp"></span>amplifikacja broni na poziomie V</div>
+    <h1>${esc(name)}</h1>
+    <div class="facts"><span>badanie na Research Station 4, montaż na broni V (Gunsmith 4)</span>
+      <a href="https://arcraiders.wiki/wiki/Amplified_Weapons" target="_blank" rel="noopener">Amplified Weapons ↗</a>
+      <a href="https://arcraiders.wiki/wiki/Amplified_Research" target="_blank" rel="noopener">Amplified Research ↗</a></div>
+    ${needs.size || ledTo.length ? `<div class="facts">${needs.size ? `<span>${list.every(a => a.requires) ? "najpierw amplifikacja" : "na części broni najpierw"}: ${[...needs].map(ampLink).join(", ")}</span>` : ""}${ledTo.length ? `<span>otwiera: ${ledTo.map(ampLink).join(", ")}</span>` : ""}</div>` : ""}
+    </div>`;
+  document.title = `${name} · ARC Raiders Crafting Atlas`;
+  const step = (n, title, body) => `<div class="card astep"><div class="recipe-h"><span class="num-b">${n}</span><span class="ttl">${title}</span></div>${body}</div>`;
+  const s1 = project
+    ? step(1, `Odblokuj badanie <b>${esc(project)}</b>`, task.length
+      ? `<ul class="task">${task.map(t => /^\(.*\)$/.test(t) ? `<li class="tnote">${srcText(t)}</li>` : `<li>${srcText(t)}</li>`).join("")}</ul>`
+      : `<div class="empty">Wiki nie podaje zadania dla tego badania.</div>`)
+    : step(1, "Odblokuj", `<div class="empty">Ta amplifikacja nie wymaga badania (według wiki).</div>`);
+  const s2 = res.length
+    ? step(2, "Naucz się (Research Station 4)", `<div class="acost">${costLine(res)}<button class="btn sm" id="amp-res">+ do kalkulatora</button></div>`)
+    : step(2, "Naucz się", `<div class="empty">${project ? "Wiki nie podaje kosztu tego badania." : "Nic do zrobienia."}</div>`);
+  const by = new Map(); for (const a of list) push(by, a.weapon, a);
+  const s3 = step(3, "Załóż na broń", by.size ? `<div class="tblwrap"><table>
+    <thead><tr><th>Broń (poziom V)</th><th>Materiały</th><th>Wymaga</th><th></th></tr></thead><tbody>
+    ${[...by].map(([w, l]) => `<tr><td>${link(w)}</td><td>${costLine(l)}</td><td>${l[0].requires ? ampLink(l[0].requires) : "—"}</td>
+      <td class="act"><button class="btn sm" data-ampcalc="${esc(w)}" title="Dodaje do kalkulatora broń ${esc(w)} (z ulepszeniem do V) i materiały tej amplifikacji">+ do kalkulatora</button></td></tr>`).join("")}
+    </tbody></table></div><div class="note" style="padding:8px 12px">Najpierw ulepsz broń do V (Amplification Module, Gunsmith 4). Wybranej amplifikacji nie da się potem zmienić.</div>`
+    : `<div class="empty">Wiki nie podaje, na które bronie pasuje.</div>`);
+  const panel = $("#panel");
+  panel.innerHTML = `<div class="sec"><div style="display:grid;gap:12px">${s1}${s2}${s3}</div></div>`;
+  const toCalc = items => { for (const [n, q] of items) calcAdd(n, q); location.hash = slug(cur); tab = "calc"; store.set("arc-tab", tab); };
+  const rb = $("#amp-res"); if (rb) rb.onclick = () => toCalc(res.filter(r => r.item !== "Research Points").map(r => [r.item, r.qty]));
+  panel.querySelectorAll("[data-ampcalc]").forEach(b => b.onclick = () => toCalc([[b.dataset.ampcalc, 1], ...by.get(b.dataset.ampcalc).map(a => [a.item, a.qty])]));
+}
+
 /* ---------- loot, traders, rewards ---------- */
 // Sekcja „Sources” ze strony wiki jako drzewo. Linki prowadzą do Atlasu, gdy znamy przedmiot, a w pozostałych
 // przypadkach (pojemniki, wrogowie, handlarze, mapy) do wiki.
@@ -788,6 +848,8 @@ function renderPanel(mode) {
 }
 const saveOpt = () => store.set("arc-opt", opt);
 function render() {
+  document.querySelector(".tabs").hidden = !!ampCur;
+  if (ampCur) { renderAmpPage(); return; }
   renderHead();
   $("#n-uses").textContent = desc(cur).size + ampCount(cur);
   $("#n-calc").textContent = CALC.list.length || "–";
@@ -1410,13 +1472,20 @@ function score(n, s) {
 function showSugg() {
   const s = q.value.trim().toLowerCase();
   if (!s) { sugg.hidden = true; box.setAttribute("aria-expanded", "false"); return; }
-  hits = NAMES.map(n => [n, score(n, s)]).filter(x => x[1] >= 0 && shown(x[0])).sort((a, b) => a[1] - b[1] || a[0].localeCompare(b[0])).slice(0, 14).map(x => x[0]);
+  // Amplifikacje i projekty badawcze nie są przedmiotami: trafiają do wyników jako "amp:" + nazwa amplifikacji.
+  const amps = [...AMPS.keys()].map(a => [a, "amp:" + a, "amplifikacja"]);
+  for (const [p, rs] of resBy) if (!p.startsWith("→") && rs[0].unlocks) amps.push([p, "amp:" + rs[0].unlocks, "badanie → " + rs[0].unlocks]);
+  const all = [...NAMES.filter(shown).map(n => [n, n, null]), ...amps];
+  hits = all.map(x => [...x, score(x[0], s)]).filter(x => x[3] >= 0).sort((a, b) => a[3] - b[3] || a[0].localeCompare(b[0])).slice(0, 14);
   active = 0;
-  sugg.innerHTML = hits.length ? hits.map((n, i) => `<li role="option" id="o${i}" data-n="${esc(n)}" aria-selected="${i === 0}"><span class="dot rar-${rarity(n)}"></span><span>${markText(n, s)}</span><span class="t">${esc((ITEMS[n] && ITEMS[n].type) || (byOut.has(n) ? "craftowalny" : ""))}</span></li>`).join("")
+  sugg.innerHTML = hits.length ? hits.map(([label, key, kind], i) => `<li role="option" id="o${i}" data-n="${esc(key)}" aria-selected="${i === 0}"><span class="dot ${kind ? "amp" : `rar-${rarity(key)}`}"></span><span>${markText(label, s)}</span><span class="t">${esc(kind || (ITEMS[key] && ITEMS[key].type) || (byOut.has(key) ? "craftowalny" : ""))}</span></li>`).join("")
     : `<li aria-disabled="true"><span class="t" style="margin:0">Nic nie pasuje do „${esc(q.value)}”.</span></li>`;
   sugg.hidden = false; box.setAttribute("aria-expanded", "true");
 }
-function pick(n) { q.value = ""; sugg.hidden = true; q.blur(); go(n); }
+function pick(n) {
+  q.value = ""; sugg.hidden = true; q.blur();
+  if (n.startsWith("amp:")) location.hash = "amp-" + slug(n.slice(4)); else go(n);
+}
 q.addEventListener("input", showSugg);
 q.addEventListener("focus", showSugg);
 q.addEventListener("keydown", e => {
@@ -1426,7 +1495,7 @@ q.addEventListener("keydown", e => {
     active = (active + (e.key === "ArrowDown" ? 1 : -1) + hits.length) % hits.length;
     sugg.querySelectorAll("li").forEach((li, i) => li.setAttribute("aria-selected", String(i === active)));
     sugg.children[active].scrollIntoView({ block: "nearest" });
-  } else if (e.key === "Enter") { e.preventDefault(); pick(hits[active]); }
+  } else if (e.key === "Enter") { e.preventDefault(); pick(hits[active][1]); }
   else if (e.key === "Escape") { sugg.hidden = true; }
 });
 sugg.addEventListener("mousedown", e => { const li = e.target.closest("li[data-n]"); if (li) { e.preventDefault(); pick(li.dataset.n); } });

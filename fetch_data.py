@@ -229,6 +229,22 @@ def main():
         for w in category_members(f"Category:{rar} Weapons"):
             weapon_rarity[w] = rar
 
+    # Przedmioty badawcze dają punkty badań; wiki ma to tylko w tekście ich stron ({{Price|1000|Research Points}}).
+    # Gdy strony nie da się pobrać albo nie ma tam liczby, przedmiot zostaje bez tej informacji.
+    print("research items…")
+    for n, it in items.items():
+        if it["type"] != "Research Item":
+            continue
+        try:
+            # Zwykle szablon {{Price|1000|Research Points}}, czasem zwykły tekst „grants 150 Research Points”.
+            m = re.search(r"\{\{Price\|([\d,]+)\|Research Points|grants\s+([\d,]+)\s+\[*Research Points", wikitext(n))
+        except Exception as e:  # noqa: BLE001 – brak tej jednej informacji nie może zatrzymać pobierania
+            print(f"UWAGA: {n}: {e}")
+            continue
+        if m:
+            it["rp"] = num((m.group(1) or m.group(2)).replace(",", ""))
+        time.sleep(0.3)
+
     # Amplifikacje (broń na poziomie V) są tylko w tekście dwóch stron wiki, nie w Cargo. Gdy parser nic nie
     # znajdzie (ktoś przebudował stronę), bierzemy poprzednie dane z data.json i ostrzegamy, zamiast je zgubić.
     print("amplifications…")

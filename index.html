@@ -74,6 +74,7 @@ button, input, select { font: inherit; color: inherit; }
 .fchip { border: 1px solid var(--line); background: var(--surface); border-radius: 4px; padding: 4px 10px; font-size: 13px; cursor: pointer; display: inline-flex; gap: 8px; align-items: center; }
 .fchip b { font-family: var(--f-mono); font-weight: 400; font-size: 12px; color: var(--muted); }
 .fchip::before { content: ""; width: 12px; height: 12px; border-radius: 2px; border: 1.5px solid var(--accent); background: var(--accent); box-shadow: inset 0 0 0 2px var(--surface); }
+.fchip.lone { border-style: dashed; margin-right: 10px; }
 .fchip[aria-pressed="false"] { color: var(--muted); text-decoration: line-through; background: transparent; }
 .fchip[aria-pressed="false"]::before { background: transparent; border-color: var(--muted); }
 
@@ -323,7 +324,12 @@ const opt = Object.assign({ recycling: true, salvaging: true, depth: 2, sort: "p
 let showAll = false, treeFilter = "";
 const hidden = new Set(store.get("arc-hidden", []));
 const typeOf = n => (ITEMS[n] && ITEMS[n].type) || "Other";
-const vis = n => n === cur || !hidden.has(typeOf(n));
+// Przedmioty bez żadnego powiązania (klucze, trinkety, przedmioty badawcze…) są tylko w wyszukiwarce.
+// Filtr „bez craftingu i recyklingu” trzyma się w tym samym zbiorze `hidden` pod kluczem LONE_KEY.
+const LONE_KEY = "__lone";
+let LONE = new Set();
+const shown = n => !hidden.has(typeOf(n)) && !(LONE.has(n) && hidden.has(LONE_KEY));
+const vis = n => n === cur || shown(n);
 
 const push = (m, k, v) => { let a = m.get(k); if (!a) m.set(k, a = []); a.push(v); };
 // Kilka przepisów na jeden przedmiot to dziś tylko wersja „w rajdzie”: craft z ekwipunku dzięki umiejętności,
@@ -359,7 +365,8 @@ function init(data) {
   for (const a of data.amps || []) { push(ampUse, a.item, a); push(ampOf, a.weapon, a); }
   for (const r of data.research || []) { push(resUse, r.item, r); push(resBy, r.project, r); push(resBy, "→" + r.unlocks, r); }
   const all = new Set([...byOut.keys(), ...byIn.keys(), ...recFrom.keys(), ...recTo.keys(), ...ups.keys(), ...projs.keys(), ...quests.keys(), ...ampUse.keys(), ...ampOf.keys(), ...resUse.keys()]);
-  NAMES = [...all].sort((a, b) => a.localeCompare(b));
+  LONE = new Set(Object.keys(ITEMS).filter(n => !all.has(n)));
+  NAMES = [...all, ...LONE].sort((a, b) => a.localeCompare(b));
   for (const n of NAMES) SLUG.set(slug(n), n);
   $("#stamp").textContent = `dane z wiki: ${data.fetched}`;
   renderFilters();
@@ -372,10 +379,10 @@ function renderFilters() {
   const counts = new Map();
   for (const n of NAMES) counts.set(typeOf(n), (counts.get(typeOf(n)) || 0) + 1);
   const types = [...counts].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
-  $("#fchips").innerHTML = types.map(([t, c]) => `<button class="fchip" data-type="${esc(t)}" aria-pressed="${!hidden.has(t)}">${t === "Other" ? "Inne / bez typu" : esc(t)}<b>${c}</b></button>`).join("");
+  $("#fchips").innerHTML = `<button class="fchip lone" data-type="${LONE_KEY}" aria-pressed="${!hidden.has(LONE_KEY)}" title="Przedmioty, które nie biorą udziału w craftingu, recyklingu, ulepszeniach, projektach, questach ani amplifikacjach. Są tylko w wyszukiwarce.">Bez craftingu i recyklingu<b>${LONE.size}</b></button>` + types.map(([t, c]) => `<button class="fchip" data-type="${esc(t)}" aria-pressed="${!hidden.has(t)}">${t === "Other" ? "Inne / bez typu" : esc(t)}<b>${c}</b></button>`).join("");
   $("#fcount").textContent = hidden.size ? `${hidden.size} ukryte` : "";
   $("#freset").hidden = !hidden.size;
-  $("#fnone").hidden = hidden.size === counts.size;
+  $("#fnone").hidden = hidden.size === counts.size + 1;
 }
 function filtersChanged() {
   store.set("arc-hidden", [...hidden]); descMemo.clear(); renderFilters(); render();
@@ -388,7 +395,7 @@ $("#fchips").addEventListener("click", e => {
   const t = b.dataset.type; hidden.has(t) ? hidden.delete(t) : hidden.add(t); filtersChanged();
 });
 $("#freset").onclick = () => { hidden.clear(); filtersChanged(); };
-$("#fnone").onclick = () => { for (const n of NAMES) hidden.add(typeOf(n)); filtersChanged(); };
+$("#fnone").onclick = () => { for (const n of NAMES) hidden.add(typeOf(n)); hidden.add(LONE_KEY); filtersChanged(); };
 
 /* ---------- helpers ---------- */
 const rarity = n => (ITEMS[n] && ITEMS[n].rarity || "none").toLowerCase();
@@ -444,6 +451,7 @@ function renderHead() {
   if (it.value != null) facts.push(`<span>wartość <b>${fmt(it.value)}</b></span>`);
   if (it.weight != null) facts.push(`<span>waga <b>${fmt(it.weight)} kg</b></span>`);
   if (it.stack != null) facts.push(`<span>stos <b>${it.stack}</b></span>`);
+  if (it.rp) facts.push(`<span>daje <b>${fmt(it.rp)}</b> Research Points</span>`);
   if (byOut.has(cur)) facts.push(`<button class="btn" id="addcalc">+ do kalkulatora</button>`);
   facts.push(`<a href="https://arcraiders.wiki/wiki/${encodeURIComponent(cur.replace(/ /g, "_"))}" target="_blank" rel="noopener">strona na wiki ↗</a>`);
   const chips = [];
@@ -494,7 +502,7 @@ function summaryCard() {
     </div>`);
   }
   if (!secs.length) {
-    return `<aside class="card scard slim" aria-label="Podsumowanie"><div class="sc-sec"><span class="sc-none"><b>${esc(cur)}</b> nie da się ani wytworzyć, ani rozłożyć. To surowiec bazowy: wypada jako łup albo z recyklingu innych przedmiotów (zakładka „Jak zdobyć”).</span></div></aside>`;
+    return `<aside class="card scard slim" aria-label="Podsumowanie"><div class="sc-sec"><span class="sc-none"><b>${esc(cur)}</b> nie da się ani wytworzyć, ani rozłożyć. ${LONE.has(cur) ? "Nie jest też potrzebny w żadnym przepisie, ulepszeniu, projekcie, queście ani amplifikacji." : recTo.has(cur) ? "To surowiec bazowy: wypada jako łup albo z recyklingu innych przedmiotów (zakładka „Jak zdobyć”)." : "To surowiec bazowy: wypada tylko jako łup."}${ITEMS[cur] && ITEMS[cur].rp ? ` Daje <b>${fmt(ITEMS[cur].rp)} Research Points</b>.` : ""}</span></div></aside>`;
   }
   if (!recs.length) secs.unshift(`<div class="sc-sec"><h3>Craft z</h3><span class="sc-none">Nie da się wytworzyć.</span></div>`);
   if (!rows.length) secs.push(`<div class="sc-sec"><h3>Rozkłada się na</h3><span class="sc-none">Nie da się rozłożyć.</span></div>`);
@@ -572,7 +580,7 @@ function renderChain(mode) {
   const all = desc(cur);
   const nonCraft = (ups.get(cur) || []).length + (projs.get(cur) || []).length + (quests.get(cur) || []).length + ampCount(cur);
   if (!direct.length) {
-    return `<div class="sec"><h2>Łańcuch craftingu</h2><div class="card empty">Żaden przepis nie używa <b>${esc(cur)}</b>.${nonCraft ? " Przedmiot jest za to potrzebny do ulepszeń, projektów, questów lub amplifikacji (lista powyżej)." : " Możesz go sprzedać albo przerobić w recyklingu."}</div></div>`;
+    return `<div class="sec"><h2>Łańcuch craftingu</h2><div class="card empty">Żaden przepis nie używa <b>${esc(cur)}</b>.${nonCraft ? " Przedmiot jest za to potrzebny do ulepszeń, projektów, questów lub amplifikacji (lista powyżej)." : (recFrom.has(cur) ? " Możesz go sprzedać albo przerobić w recyklingu." : " Możesz go sprzedać.")}</div></div>`;
   }
   const f = treeFilter.trim().toLowerCase();
   const autoOpen = mode === "all" ? () => true
@@ -1319,7 +1327,7 @@ function score(n, s) {
 function showSugg() {
   const s = q.value.trim().toLowerCase();
   if (!s) { sugg.hidden = true; box.setAttribute("aria-expanded", "false"); return; }
-  hits = NAMES.map(n => [n, score(n, s)]).filter(x => x[1] >= 0 && !hidden.has(typeOf(x[0]))).sort((a, b) => a[1] - b[1] || a[0].localeCompare(b[0])).slice(0, 14).map(x => x[0]);
+  hits = NAMES.map(n => [n, score(n, s)]).filter(x => x[1] >= 0 && shown(x[0])).sort((a, b) => a[1] - b[1] || a[0].localeCompare(b[0])).slice(0, 14).map(x => x[0]);
   active = 0;
   sugg.innerHTML = hits.length ? hits.map((n, i) => `<li role="option" id="o${i}" data-n="${esc(n)}" aria-selected="${i === 0}"><span class="dot rar-${rarity(n)}"></span><span>${markText(n, s)}</span><span class="t">${esc((ITEMS[n] && ITEMS[n].type) || (byOut.has(n) ? "craftowalny" : ""))}</span></li>`).join("")
     : `<li aria-disabled="true"><span class="t" style="margin:0">Nic nie pasuje do „${esc(q.value)}”.</span></li>`;

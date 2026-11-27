@@ -2,45 +2,45 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Semi+Condensed:wght@500;600;700&display=swap">
+<script>try { if (JSON.parse(localStorage.getItem("arc-theme")) === "light") document.documentElement.dataset.theme = "light"; } catch (e) {}</script>
 <style>
 /* Layout: sticky search bar on top, item dossier header, two tabs (uses tree / sources table) in one reading column up to 1180px. */
+/* Motyw w duchu ARC Raiders: śliwkowa czerń, kremowy tekst i bursztynowy akcent z arcraiders.com,
+   kolory rzadkości z wiki (te same co w grze), Barlow jak w interfejsie gry. Domyślnie ciemny;
+   jasny wariant to krem z tej samej palety (przełącznik w nagłówku). */
 :root {
-  --bg: #eceff2;
-  --surface: #ffffff;
-  --sunk: #f4f6f8;
-  --ink: #18212b;
-  --muted: #5b6774;
-  --line: #d3dae1;
-  --accent: #0b6b74;
-  --accent-soft: #d7eef0;
-  --hl: #fbe7a6;
-  --bar: #9fd3d8;
-  --r-common: #7d8893;
-  --r-uncommon: #2f8f3a;
-  --r-rare: #2370c4;
-  --r-epic: #9440c4;
-  --r-legendary: #c48a0c;
-  --r-amplified: #c43d5f;
-  --base: #0b6b74;
-  --raid: #a8520a;
-  --f-display: "Chakra Petch", "Segoe UI", system-ui, sans-serif;
-  --f-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
-  --f-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", monospace;
+  --bg: #130918;
+  --surface: #1e1224;
+  --sunk: #180d1d;
+  --ink: #ece2d0;
+  --muted: #a89a8c;
+  --line: #3a2a3c;
+  --accent: #f1aa1c;
+  --accent-soft: #3b2814;
+  --hl: #6b4a0c;
+  --bar: #6e4c12;
+  --r-common: #9a9a9a;
+  --r-uncommon: #26bf57;
+  --r-rare: #00a9f2;
+  --r-epic: #e04aae;
+  --r-legendary: #ffc600;
+  --r-amplified: #e88629;
+  --base: #57bb7c;
+  --raid: #ec5a3c;
+  --stripe-1: #26bf57; --stripe-2: #f1aa1c; --stripe-3: #d63a2a;
+  --f-display: "Barlow Semi Condensed", "Barlow", "Segoe UI", system-ui, sans-serif;
+  --f-body: "Barlow", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "Barlow Semi Condensed", "Barlow", ui-monospace, monospace;
+  color-scheme: dark;
 }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
-  --bg: #11161b; --surface: #181f26; --sunk: #141a20; --ink: #e3e9ee; --muted: #93a0ad; --line: #2a343e;
-  --accent: #4cc3cc; --accent-soft: #163a3e; --hl: #5a4a12; --bar: #1f5a60;
-  --r-common: #9aa5b0; --r-uncommon: #5cc768; --r-rare: #5aa5f0; --r-epic: #c27ef0; --r-legendary: #f0b73a; --r-amplified: #f0708f;
-  --base: #4cc3cc; --raid: #f0a050; color-scheme: dark; } }
-:root[data-theme="dark"] {
-  --bg: #11161b; --surface: #181f26; --sunk: #141a20; --ink: #e3e9ee; --muted: #93a0ad; --line: #2a343e;
-  --accent: #4cc3cc; --accent-soft: #163a3e; --hl: #5a4a12; --bar: #1f5a60;
-  --r-common: #9aa5b0; --r-uncommon: #5cc768; --r-rare: #5aa5f0; --r-epic: #c27ef0; --r-legendary: #f0b73a; --r-amplified: #f0708f;
-  --base: #4cc3cc; --raid: #f0a050; color-scheme: dark; }
-
-* { box-sizing: border-box; }
-body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.45; }
+:root[data-theme="light"] {
+  --bg: #ece2d0; --surface: #f7f0e3; --sunk: #e5d9c4; --ink: #130918; --muted: #6a594d; --line: #cfbfa6;
+  --accent: #a86800; --accent-soft: #f3dcaa; --hl: #ffd77a; --bar: #e8bd68;
+  --r-common: #6c6c6c; --r-uncommon: #178a3d; --r-rare: #0077ad; --r-epic: #b0227f; --r-legendary: #a87f00; --r-amplified: #c0661a;
+  --base: #2c8a50; --raid: #c23c1e; color-scheme: light;
+}
+body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.45; font-variant-numeric: tabular-nums; }
 body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 30; background: var(--surface); }
 a { color: var(--accent); }
 button, input, select { font: inherit; color: inherit; }
@@ -48,17 +48,20 @@ button, input, select { font: inherit; color: inherit; }
 .wrap { max-width: 1180px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
 
 /* top bar */
+.top::after { content: ""; position: absolute; left: 0; right: 0; bottom: -7px; height: 6px; pointer-events: none;
+  background: linear-gradient(var(--stripe-1) 0 2px, var(--stripe-2) 2px 4px, var(--stripe-3) 4px 6px); }
+.thm { padding-inline: 10px; }
 .top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: var(--surface); border-bottom: 1px solid var(--line); }
 .top .wrap { display: flex; align-items: center; gap: 20px; padding-block: 12px; flex-wrap: wrap; }
 .brand { font-family: var(--f-display); font-weight: 700; font-size: 17px; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; }
 .brand small { display: block; font-family: var(--f-mono); font-weight: 400; font-size: 11px; letter-spacing: 0; text-transform: none; color: var(--muted); }
 .search { position: relative; flex: 1 1 320px; min-width: 0; }
-.search input { width: 100%; padding: 10px 14px 10px 38px; border: 1px solid var(--line); border-radius: 6px; background: var(--sunk); font-size: 16px; }
+.search input { width: 100%; box-sizing: border-box; padding: 10px 14px 10px 38px; border: 1px solid var(--line); border-radius: 3px; background: var(--sunk); font-size: 16px; }
 .search input:focus { background: var(--surface); border-color: var(--accent); outline: none; box-shadow: 0 0 0 3px var(--accent-soft); }
 .search svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; fill: none; stroke: var(--muted); stroke-width: 2; }
-.search kbd { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-family: var(--f-mono); font-size: 11px; color: var(--muted); border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px; }
-.sugg { position: absolute; left: 0; right: 0; top: calc(100% + 6px); background: var(--surface); border: 1px solid var(--line); border-radius: 6px; box-shadow: 0 10px 30px rgba(0,0,0,.18); list-style: none; margin: 0; padding: 4px; max-height: min(420px, 60vh); overflow-y: auto; }
-.sugg li { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 4px; cursor: pointer; }
+.search kbd { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-family: var(--f-mono); font-size: 11px; color: var(--muted); border: 1px solid var(--line); border-radius: 2px; padding: 1px 6px; }
+.sugg { position: absolute; left: 0; right: 0; top: calc(100% + 6px); background: var(--surface); border: 1px solid var(--line); border-radius: 3px; box-shadow: 0 10px 30px rgba(0,0,0,.18); list-style: none; margin: 0; padding: 4px; max-height: min(420px, 60vh); overflow-y: auto; }
+.sugg li { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 2px; cursor: pointer; }
 .sugg li[aria-selected="true"], .sugg li:hover { background: var(--accent-soft); }
 .sugg .t { margin-left: auto; font-size: 12px; color: var(--muted); white-space: nowrap; }
 .sugg mark { background: var(--hl); color: inherit; border-radius: 2px; }
@@ -66,12 +69,12 @@ button, input, select { font: inherit; color: inherit; }
 /* filters */
 .fbtn { padding: 9px 14px; font-size: 14px; display: inline-flex; gap: 8px; align-items: center; }
 .fbtn[aria-expanded="true"] { border-color: var(--accent); background: var(--accent-soft); }
-.fcount:not(:empty) { font-family: var(--f-mono); font-size: 12px; padding: 0 7px; border-radius: 10px; background: var(--accent); color: var(--surface); }
+.fcount:not(:empty) { font-family: var(--f-mono); font-size: 12px; padding: 0 7px; border-radius: 3px; background: var(--accent); color: var(--surface); }
 .fpanel { border-top: 1px solid var(--line); background: var(--sunk); }
 .fpanel .wrap { padding-block: 12px 14px; display: grid; gap: 10px; }
 .fhead { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; justify-content: space-between; }
 .fchips { display: flex; flex-wrap: wrap; gap: 6px; }
-.fchip { border: 1px solid var(--line); background: var(--surface); border-radius: 4px; padding: 4px 10px; font-size: 13px; cursor: pointer; display: inline-flex; gap: 8px; align-items: center; }
+.fchip { border: 1px solid var(--line); background: var(--surface); border-radius: 2px; padding: 4px 10px; font-size: 13px; cursor: pointer; display: inline-flex; gap: 8px; align-items: center; }
 .fchip b { font-family: var(--f-mono); font-weight: 400; font-size: 12px; color: var(--muted); }
 .fchip::before { content: ""; width: 12px; height: 12px; border-radius: 2px; border: 1.5px solid var(--accent); background: var(--accent); box-shadow: inset 0 0 0 2px var(--surface); }
 .fchip.lone { border-style: dashed; margin-right: 10px; }
@@ -116,7 +119,7 @@ button, input, select { font: inherit; color: inherit; }
 .facts b { color: var(--ink); font-family: var(--f-mono); font-weight: 500; }
 .needs { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
 .needs .lbl { font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-right: 4px; }
-.chip { display: inline-flex; align-items: center; gap: 6px; padding: 3px 9px; border-radius: 4px; background: var(--sunk); border: 1px solid var(--line); font-size: 13px; white-space: nowrap; }
+.chip { display: inline-flex; align-items: center; gap: 6px; padding: 3px 9px; border-radius: 2px; background: var(--sunk); border: 1px solid var(--line); font-size: 13px; white-space: nowrap; }
 .chip b { font-family: var(--f-mono); font-weight: 500; }
 .chip.k-up { border-color: color-mix(in srgb, var(--accent) 40%, var(--line)); }
 .chip .ct { font-size: 10px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
@@ -125,24 +128,24 @@ button, input, select { font: inherit; color: inherit; }
 .tabs { display: flex; gap: 4px; box-shadow: inset 0 -1px 0 var(--line); overflow-x: auto; overflow-y: hidden; }
 .tab { appearance: none; border: 0; background: none; padding: 10px 14px 12px; cursor: pointer; font-family: var(--f-display); font-size: 15px; font-weight: 600; letter-spacing: .04em; color: var(--muted); border-bottom: 3px solid transparent; white-space: nowrap; }
 .tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
-.tab .n { font-family: var(--f-mono); font-weight: 400; font-size: 12px; margin-left: 6px; padding: 1px 6px; border-radius: 10px; background: var(--sunk); }
+.tab .n { font-family: var(--f-mono); font-weight: 400; font-size: 12px; margin-left: 6px; padding: 1px 6px; border-radius: 3px; background: var(--sunk); }
 .panel { padding-block: 20px 60px; display: grid; gap: 22px; }
 .panel > * { min-width: 0; }
 .sec h2 { margin: 0 0 4px; font-family: var(--f-display); font-size: 19px; font-weight: 700; letter-spacing: .02em; }
 .sec p.sub { margin: 0 0 12px; color: var(--muted); max-width: 72ch; }
-.card { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 3px; }
 .empty { padding: 18px; color: var(--muted); }
 
 /* controls */
 .controls { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; margin-bottom: 12px; }
 .ctl { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); }
-.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; background: var(--surface); }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 3px; overflow: hidden; background: var(--surface); }
 .seg button { border: 0; background: none; padding: 5px 10px; cursor: pointer; font-size: 13px; color: var(--muted); }
 .seg button + button { border-left: 1px solid var(--line); }
 .seg button[aria-pressed="true"] { background: var(--accent-soft); color: var(--ink); font-weight: 600; }
 .ctl input[type="checkbox"] { accent-color: var(--accent); width: 16px; height: 16px; }
-.ctl input[type="search"] { padding: 6px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); width: 220px; max-width: 100%; }
-.btn { border: 1px solid var(--line); background: var(--surface); border-radius: 6px; padding: 5px 10px; font-size: 13px; cursor: pointer; }
+.ctl input[type="search"] { padding: 6px 10px; border: 1px solid var(--line); border-radius: 3px; background: var(--surface); width: 220px; max-width: 100%; }
+.btn { border: 1px solid var(--line); background: var(--surface); border-radius: 3px; padding: 5px 10px; font-size: 13px; cursor: pointer; }
 .btn:hover { border-color: var(--accent); }
 
 /* links to items */
@@ -200,7 +203,7 @@ details[open] > summary .tw { transform: rotate(90deg); }
 .nw b { font-family: var(--f-mono); font-weight: 500; }
 .foot { color: var(--muted); font-size: 12px; padding-block: 0 40px; }
 /* graph */
-.gwrap { position: relative; height: min(72vh, 760px); min-height: 380px; overflow: hidden; border-radius: 8px; background:
+.gwrap { position: relative; height: min(72vh, 760px); min-height: 380px; overflow: hidden; border-radius: 3px; background:
   radial-gradient(circle, color-mix(in srgb, var(--line) 80%, transparent) 1px, transparent 1.2px) 0 0 / 22px 22px, var(--surface); }
 .gwrap svg { width: 100%; height: 100%; display: block; touch-action: none; cursor: grab; user-select: none; }
 .gwrap svg.drag { cursor: grabbing; }
@@ -247,7 +250,7 @@ svg.dim .me.hv { stroke: var(--raid); stroke-opacity: .9; stroke-width: 1.6; str
 .mi-h { font-size: 12px; color: var(--raid); border-top: 1px dashed var(--line); padding-top: 4px; margin-top: 2px; }
 .mn.pin circle { stroke: var(--accent); stroke-width: 3; }
 .mn.pin text { font-weight: 700; font-size: 13px; }
-.minfo { position: absolute; left: 10px; top: 10px; z-index: 2; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 10px 12px; display: grid; gap: 4px; max-width: min(300px, calc(100% - 140px)); box-shadow: 0 6px 20px rgba(0,0,0,.12); }
+.minfo { position: absolute; left: 10px; top: 10px; z-index: 2; background: var(--surface); border: 1px solid var(--line); border-radius: 3px; padding: 10px 12px; display: grid; gap: 4px; max-width: min(300px, calc(100% - 140px)); box-shadow: 0 6px 20px rgba(0,0,0,.12); }
 .mi-n { display: flex; gap: 8px; align-items: center; font-family: var(--f-display); font-size: 15px; }
 .mi-f { font-size: 12px; color: var(--muted); }
 .minfo .btn { margin-top: 4px; justify-self: start; }
@@ -275,7 +278,7 @@ svg.dim .me.hv { stroke: var(--raid); stroke-opacity: .9; stroke-width: 1.6; str
 .csearch { flex: 0 1 380px; }
 .csearch input { font-size: 15px; padding-block: 7px; }
 .cgrid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); align-items: start; }
-.cqty { display: inline-flex; align-items: center; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; background: var(--surface); }
+.cqty { display: inline-flex; align-items: center; border: 1px solid var(--line); border-radius: 3px; overflow: hidden; background: var(--surface); }
 .cqty button { border: 0; background: none; width: 28px; padding: 4px 0; cursor: pointer; color: var(--muted); font-family: var(--f-mono); }
 .cqty button:hover { background: var(--accent-soft); color: var(--ink); }
 .cqty input { width: 56px; border: 0; border-inline: 1px solid var(--line); padding: 4px 6px; text-align: right; font-family: var(--f-mono); background: var(--sunk); -moz-appearance: textfield; }
@@ -286,9 +289,17 @@ td.act { width: 1%; white-space: nowrap; text-align: right; }
 tfoot td { background: var(--sunk); color: var(--muted); font-size: 13px; border-top: 1px solid var(--line); border-bottom: 0; }
 tfoot td b { font-family: var(--f-mono); font-weight: 500; color: var(--ink); }
 .surplus { font-size: 12px; color: var(--muted); }
+.alts { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; margin-top: 5px; font-size: 12.5px; }
+.alts .lbl { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .08em; }
+.alts .lbl + * { margin-left: 0; }
+.alt { border: 1px dashed var(--line); background: none; border-radius: 2px; padding: 1px 7px; cursor: pointer; color: var(--ink); }
+.alt:hover { border-color: var(--accent); border-style: solid; color: var(--accent); }
+.alt b, .alts .rc b { font-weight: 600; }
+.alts .rc { display: inline-flex; align-items: center; gap: 4px; }
+.alts .part { color: var(--muted); }
 tr.done td { color: var(--muted); }
 tr.done td b { color: var(--muted); font-weight: 400; }
-input.have { width: 62px; border: 1px solid var(--line); border-radius: 5px; padding: 3px 6px; text-align: right; font-family: var(--f-mono); background: var(--sunk); color: var(--ink); -moz-appearance: textfield; }
+input.have { width: 62px; border: 1px solid var(--line); border-radius: 2px; padding: 3px 6px; text-align: right; font-family: var(--f-mono); background: var(--sunk); color: var(--ink); -moz-appearance: textfield; }
 input.have::-webkit-inner-spin-button, input.have::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 input.have:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
 .kept { font-size: 11px; color: var(--muted); border: 1px dashed var(--line); border-radius: 3px; padding: 0 5px; margin-left: 6px; }
@@ -305,6 +316,7 @@ input.have:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
       <kbd>/</kbd>
       <ul id="sugg" class="sugg" role="listbox" hidden></ul>
     </div>
+    <button class="btn thm" id="thm" aria-label="Przełącz jasny lub ciemny motyw" title="Jasny / ciemny motyw">◐</button>
     <button class="btn fbtn" id="fbtn" aria-expanded="false" aria-controls="fpanel">Filtry<span class="fcount" id="fcount"></span></button>
   </div>
   <div class="fpanel" id="fpanel" hidden>
@@ -1358,8 +1370,44 @@ function calcRun() {
       lvl.set(m, Math.max(lvl.get(m) ?? 0, (lvl.get(n) || 0) + 1));
     }
   }
+  // Jaka część zapotrzebowania na przedmiot bierze się z każdego półproduktu nad nim (share[x][a] = 0..1).
+  // Dzięki temu przy 190× Chemicals można napisać „albo 10× Crude Explosives, albo 3× Explosive Compound”.
+  const byName = new Map(crafts.map(c => [c.n, c])), share = new Map();
+  for (const c of crafts) {
+    const sc = share.get(c.n) || new Map();
+    if (c.lvl > 0) sc.set(c.n, 1);
+    share.set(c.n, sc);
+    if (!c.k) continue;
+    for (const [m, cnt] of c.r.in) {
+      const total = need.get(m); if (!total) continue;
+      const sm = share.get(m) || new Map(); share.set(m, sm);
+      for (const [a, f] of sc) sm.set(a, (sm.get(a) || 0) + f * c.k * cnt / total);
+    }
+  }
+  // Tylko półprodukty, przez które przechodzi całe zapotrzebowanie: „albo” znaczy wtedy naprawdę „zamiast”.
+  // Najbliższe pierwsze, najwyżej trzy.
+  const altsOf = x => [...(share.get(x.n) || [])].filter(([a, f]) => a !== x.n && f > .999 && byName.get(a).rest > 0)
+    .map(([a, f]) => ({ c: byName.get(a), f: 1 })).sort((p, q) => q.c.lvl - p.c.lvl).slice(0, 3);
+  for (const x of [...crafts, ...raw]) x.alts = altsOf(x);
   raw.sort((a, b) => b.rest - a.rest || b.need - a.need || a.n.localeCompare(b.n));
   return { crafts: crafts.reverse(), raw };
+}
+// Najwydajniejszy przedmiot do recyklingu w bazie (najwięcej sztuk z jednej), bez tych robionych z samego x.
+function bestRecycle(n) {
+  let best = null;
+  for (const e of recTo.get(n) || []) {
+    if (e.type !== "recycling" || !shown(e.src)) continue;
+    if ((byOut.get(e.src) || []).some(r => r.in.some(([m]) => m === n))) continue;
+    if (!best || e.qty > best.qty || (e.qty === best.qty && (ITEMS[e.src]?.value ?? 1e9) < (ITEMS[best.src]?.value ?? 1e9))) best = e;
+  }
+  return best;
+}
+// Linia „albo …” pod przedmiotem w kalkulatorze: półprodukty wyżej (klik = zdobędę gotowe) i recykling.
+function altLine(x, withRecycle) {
+  const parts = x.alts.map(({ c, f }) => `<button class="alt" data-keep="${esc(c.n)}" title="Zdobądź ${esc(c.n)} gotowe zamiast craftować${f < .999 ? `; pokrywa ${fmt(Math.round(f * x.rest))} z ${fmt(x.rest)} ${esc(x.n)}` : ""}"><b>${fmt(c.rest)}×</b> ${esc(c.n)}${f < .999 ? ` <span class="part">(część)</span>` : ""}</button>`);
+  const rc = withRecycle && x.rest > 0 ? bestRecycle(x.n) : null;
+  if (!parts.length && !rc) return "";
+  return `<div class="alts">${parts.length ? `<span class="lbl">albo</span>${parts.join("")}` : ""}${rc ? `<span class="lbl">${parts.length ? "lub rozłóż" : "albo rozłóż"}</span><span class="rc"><b>${fmt(Math.ceil(x.rest / rc.qty))}×</b> ${link(rc.src)} <span class="part">(${rc.qty} z 1 szt.)</span></span>` : ""}</div>`;
 }
 const haveInput = (n, need) => `<input class="have" type="number" min="0" step="1" value="${CALC.have[n] || ""}" placeholder="0" data-have="${esc(n)}" aria-label="Ile masz ${esc(n)}" title="Ile już masz (z ${fmt(need)} potrzebnych)">`;
 function renderCalc() {
@@ -1375,7 +1423,7 @@ function renderCalc() {
       ${L.length || keep.size || hasHave ? `<button class="btn" id="cclear">Wyczyść wszystko</button>` : ""}
     </div>`;
   const head = `<h2>Kalkulator craftingu</h2>
-    <p class="sub">Dodaj przedmioty i ile sztuk chcesz mieć. Kalkulator rozpisze każdy poziom: ile craftować półproduktów i ile surowców zebrać. W kolumnie „mam” wpisz, co już masz, na dowolnym poziomie: zapas półproduktu zmniejsza też wszystko pod nim. „Zdobędę gotowe” przenosi półprodukt do listy do zdobycia, np. gdy Explosive Compound łatwiej znaleźć, niż zrobić. Przepis dający kilka sztuk naraz liczy się w pełnych craftach.</p>`;
+    <p class="sub">Dodaj przedmioty i ile sztuk chcesz mieć. Kalkulator rozpisze każdy poziom: ile craftować półproduktów i ile surowców zebrać. Pod surowcem jest „albo”: ile sztuk półproduktu wyżej wystarczy zamiast niego (kliknij, żeby zdobyć go gotowy) i co rozłożyć, żeby go dostać. W kolumnie „mam” wpisz, co już masz, na dowolnym poziomie: zapas półproduktu zmniejsza też wszystko pod nim. „Zdobędę gotowe” przenosi półprodukt do listy do zdobycia, np. gdy Explosive Compound łatwiej znaleźć, niż zrobić. Przepis dający kilka sztuk naraz liczy się w pełnych craftach.</p>`;
   if (!L.length) return `<div class="sec">${head}${controls}<div class="card empty">Lista jest pusta. Wyszukaj przedmiot powyżej albo otwórz go i kliknij „+ do kalkulatora”.</div></div>`;
   const { crafts, raw } = calcRun();
   const targets = `<div class="card"><div class="recipe-h"><span class="ttl">Chcę wytworzyć</span></div><div class="tblwrap"><table>
@@ -1390,7 +1438,7 @@ function renderCalc() {
   const rawT = `<div class="card"><div class="recipe-h"><span class="ttl">Do zdobycia</span><span class="note">${left ? `brakuje ${left} z ${raw.length} rodzajów` : "masz wszystko"}</span></div><div class="tblwrap"><table>
     <thead><tr><th class="num">Brakuje</th><th>Przedmiot</th><th class="num">Mam</th><th class="num">Waga</th><th></th></tr></thead><tbody>
     ${raw.map(x => { const it = ITEMS[x.n] || {}; return `<tr class="${x.rest ? "" : "done"}"><td class="num"><b>${fmt(x.rest)}×</b>${x.own ? `<div class="surplus">z ${fmt(x.need)}</div>` : ""}</td>
-      <td>${link(x.n)}${keep.has(x.n) ? `<span class="kept">gotowy, bez craftu</span>` : ""} ${needBadges(x.n)}</td>
+      <td>${link(x.n)}${keep.has(x.n) ? `<span class="kept">gotowy, bez craftu</span>` : ""} ${needBadges(x.n)}${altLine(x, true)}</td>
       <td class="num">${haveInput(x.n, x.need)}</td>
       <td class="num">${it.weight != null ? fmt(it.weight * x.rest) + " kg" : "—"}</td>
       <td class="act">${keep.has(x.n) ? `<button class="btn sm" data-unkeep="${esc(x.n)}" title="Wróć do craftowania tego przedmiotu">craftuj</button>` : ""}</td></tr>`; }).join("")}
@@ -1401,7 +1449,7 @@ function renderCalc() {
       if (c.own) note.push(c.rest ? `potrzeba ${fmt(c.need)}, masz ${fmt(c.own)}` : `masz wszystkie ${fmt(c.need)}, nie craftujesz`);
       if (c.made > c.rest) note.push(`daje ${c.made} szt., potrzeba ${fmt(c.rest)} (+${fmt(c.made - c.rest)} zapasu)`);
       else if (c.r.qty > 1 && c.k) note.push(`daje ${c.made} szt.`);
-      return `<tr class="${c.k ? "" : "done"}"><td class="num"><b>${c.k}×</b></td><td><div style="padding-left:${Math.min(c.lvl, 6) * 14}px">${link(c.n)} ${bp(c.r)}${note.length ? `<div class="surplus">${note.join(" · ")}</div>` : ""}</div></td>
+      return `<tr class="${c.k ? "" : "done"}"><td class="num"><b>${c.k}×</b></td><td><div style="padding-left:${Math.min(c.lvl, 6) * 14}px">${link(c.n)} ${bp(c.r)}${note.length ? `<div class="surplus">${note.join(" · ")}</div>` : ""}${c.k ? altLine(c, false) : ""}</div></td>
       <td class="num">${c.lvl ? haveInput(c.n, c.need) : ""}</td>
       <td>${stations(c.r)}</td>
       <td class="act">${c.lvl ? `<button class="btn sm" data-keep="${esc(c.n)}" title="Nie craftuj: zdobędziesz gotowy (łup, handel), więc trafi do listy „Do zdobycia”">zdobędę gotowe</button>` : ""}</td></tr>`; }).join("")}
@@ -1457,6 +1505,14 @@ function bindCalc() {
   inp.addEventListener("blur", () => setTimeout(() => { ul.hidden = true; }, 120));
   ul.addEventListener("mousedown", e => { const li = e.target.closest("li[data-n]"); if (li) { e.preventDefault(); choose(li.dataset.n); } });
 }
+
+/* ---------- theme ---------- */
+$("#thm").onclick = () => {
+  const light = document.documentElement.dataset.theme !== "light";
+  if (light) document.documentElement.dataset.theme = "light"; else delete document.documentElement.dataset.theme;
+  store.set("arc-theme", light ? "light" : "dark");
+  if (tab === "graph" || tab === "map") renderPanel();
+};
 
 /* ---------- search ---------- */
 const q = $("#q"), sugg = $("#sugg"), box = q.parentElement;

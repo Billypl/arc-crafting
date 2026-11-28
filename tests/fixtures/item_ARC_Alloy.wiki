@@ -1,0 +1,52 @@
+{{Infobox item
+| image         = ARC Alloy.png
+| name          = ARC Alloy
+| rarity        = Uncommon
+| quote         = Obtained from ARC enemies or activities, or by recycling certain ARC parts. Used to craft components.
+| type          = Topside Material
+| location      = ARC
+| weight        = 0.25
+| sellprice     = 200
+| stacksize     = 15
+}}
+'''ARC Alloy''' is an Uncommon item scavenged from destroyed [[ARC]] machines.
+
+== Sources ==
+* Scavenging 
+** ARC
+* Recycling
+
+== Crafting ==
+{{Used in crafting}}
+
+== Workshop Upgrade ==
+{| class="wikitable"
+! Items || !! Result
+|-
+| 50× [[Fabric]]<br>6× ARC Alloy
+| '''→'''
+| Medical Lab 1
+|-
+| 50× [[Chemicals]]<br>6× ARC Alloy
+| '''→'''
+| Explosives Station 1
+|-
+| 50× [[Plastic Parts]]<br>6× ARC Alloy
+| '''→'''
+| Utility Station 1
+|}
+
+== Projects ==
+{{Used in projects}}
+
+== Quests ==
+{{Used in quests}}
+
+== Recycled & Salvaged Material ==
+{{Recycling table
+| recycling1 = 2 Metal Parts
+| salvaging1 = 1 Metal Parts
+}}
+
+== Recycled from ==
+{{Recycled from}}

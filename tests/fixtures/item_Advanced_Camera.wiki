@@ -1,0 +1,43 @@
+{{stub}}
+{{Infobox item
+| image          = Advanced Camera.png
+| name           = Advanced Camera
+| rarity         = Rare
+| quote          = A more advanced camera with a few extra bells and whistles.
+| type           = Quick Use-Gadget
+| warning        = Pictures can be found in Codex, Camera
+| weight         = 0.5
+| sellprice      = 1000
+| stacksize      = 1
+}}
+The '''Advanced Camera''' is a Rare [[Quick Use#Gadgets|Gadget]]. It can do everything the [[Basic Camera]] can do, and more.
+
+== Sources ==
+* Crafting
+** Requires a learned [[{{PAGENAME}} Blueprint|Blueprint]]
+* Sold by [[Shani]] ({{Price|3,000|Coins}}, 3 per day)
+* Quests: {{Sourced from quests}}
+* Projects: {{Sourced from projects}}
+* Free [[Reward Pass]]
+
+== Required Materials to Craft ==
+{{Crafting
+| ingredients = 1 Camera Lens + 1 Calculator + 1 Electrical Components
+| station = Utility Station 1
+| blueprint = y
+}}
+
+== Recycling & Salvaging ==
+{{Recycling table
+ | recycling1 = 1 Calculator
+ | salvaging1 = 5 Plastic Parts
+ }}
+
+== History ==
+{| class="wikitable"
+! Patch !! <center>Changes</center>
+|-
+| [[Update:2.0|Frozen Trails - 2.0]]
+|
+* Added to the game.
+|}

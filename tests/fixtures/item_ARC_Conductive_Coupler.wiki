@@ -1,0 +1,45 @@
+{{Infobox item
+|image=ARC Conductive Coupler.png
+|rarity=Epic
+|type=Topside Material
+|name=ARC Conductive Coupler
+|quote=One of three distinct coupler's found in ARC machines, said to combine into a singular conduit.
+|location=ARC
+|weight=0.5
+|stacksize=1
+|sellprice=100
+}}
+'''ARC Conductive Coupler''' is an epic item scavenged from a [[Harvester Payload]] after deploying an [[Emperor Beacon]].
+
+== Sources ==
+* Scavenging
+** [[Harvester Payload]]
+** [[Rocketeer]]
+** [[Leaper]]
+
+== Crafting ==
+{{Used in crafting}}
+
+== Workshop Upgrade ==
+{| class="wikitable"
+!Items
+!
+!Result
+|-
+|
+|
+|
+|-
+|}
+
+== Projects ==
+{{Used in projects}}
+
+== Quests ==
+{{Used in quests}}
+
+== Recycled & Salvaged Material ==
+This item can't be Recycled or Salvaged
+
+== Recycled from ==
+{{Recycled from}}

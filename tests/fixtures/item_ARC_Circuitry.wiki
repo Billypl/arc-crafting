@@ -1,0 +1,73 @@
+{{Infobox item
+| image          = ARC Circuitry.png
+| name           = ARC Circuitry
+| rarity         = Rare
+| quote          = Obtained from ARC enemies or activities. Used to craft components. Can be recycled into ARC Alloy.
+| type           = Topside Material
+| location       = ARC
+| weight         = 0.3
+| sellprice      = 1000
+| stacksize      = 5
+}}
+'''ARC Circuitry''' is a Rare item scavenged from destroyed [[ARC]] machines.
+
+== Sources ==
+* Scavenging
+** ARC
+*** [[Baron Husk]]
+*** [[Bastion]]
+*** [[Courier]]
+*** [[Matriarch]]
+*** [[Probe]]
+*** [[Queen]]
+*** [[Rocketeer]]
+*** [[Surveyor]]
+* Crafting
+* Recycling
+
+== Required Materials to Craft ==
+{{Crafting
+ | ingredients = 8 ARC Alloy
+ | station = Refiner 2
+}}
+
+== Crafting ==
+{{Used in crafting}}
+
+== Workshop Upgrade ==
+{| class = "wikitable"
+! Items !! Workshop || !! Result
+|-
+| 3× [[Motor]]<br>10× ARC Circuitry<br>6× [[Bombardier Cell]]
+| Refiner 2 || '''→''' || Refiner 3
+|}
+
+== Repairing ==
+{| class = "wikitable"
+! Recipe || !! Repair
+|-
+| 1× ARC Circuitry<br>1× [[Battery]]
+| '''→'''
+| 1× [[Medium Shield]]
+|}
+
+== Recycled & Salvaged Material ==
+{{Recycling table
+| recycling1 = 2 ARC Alloy
+| salvaging1 = 1 ARC Alloy
+}}
+
+== Recycled from ==
+{{Recycled from}}
+
+== History ==
+{| class = "wikitable"
+! Patch !! Changes
+|-
+| [[Update:1.2.0|1.2.0]]
+|
+* Unlock:
+** Refiner 3 '''→''' Refiner 2
+* Crafting:
+** 6× ARC Alloy '''→''' 8× ARC Alloy
+|}

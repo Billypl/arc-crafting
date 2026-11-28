@@ -1,0 +1,202 @@
+'''Amplified Research''' projects are specialized research tasks at the [[Research Station]] that unlock powerful [[Amplification|Weapon Amplifications]].
+
+== Overview ==
+Completing an Amplified Research project follows a two-step progression:
+* '''Step 1:''' Complete specific combat challenges, damage milestones, or exploration tasks.
+* '''Step 2:''' Submit '''5,000 [[Research Points]]''' along with ARC components.
+
+Once completed, the unlocked Amplification becomes permanently available for activation on eligible Level 5 [[Amplified Weapons]].
+
+== Requirements ==
+To access and complete Amplified Research projects, raiders must upgrade their [[Workshop|workshops]]:
+* [[Research Station|'''Research Station''']] Level 4
+
+== Research Projects ==
+{| class="wikitable sortable" style="width: 1000px; max-width: 100%;"
+! Research Project
+! Unlocks
+! Research Steps
+|-
+|
+=== '''Action Economy''' ===
+<blockquote>The Hairpin wastes very little motion between shots. That sort of efficiency gets more interesting once a scope is involved.</blockquote>
+| Ergonomic Bolt
+| valign="top" |<tabber>
+|-|Step 1 =
+(In one round)
+* Deal 1,000 damage with a [[Hairpin]]
+|-|Step 2 =
+* 5,000 Research Points
+* 8 [[Sentinel Firing Core]]
+</tabber>
+|-
+|
+=== '''Beam Resonance Tech''' ===
+<blockquote>The Equalizer is at its best when the beam stays exactly where the target would rather not have it. Maybe we can work with that.</blockquote>
+| Ramping Damage
+| valign="top" |<tabber>
+|-|Step 1 =
+* Deal 1,500 damage to [[Vaporizer|Vaporizers]] with an [[Equalizer]] in one round
+|-|Step 2 =
+* 5,000 Research Points
+* 2 [[Queen Reactor]]
+</tabber>
+|-
+|
+=== '''Compact Combustion Charges''' ===
+<blockquote>Most explosives end with the detonation. Blaze Grenades have the good sense to keep causing trouble afterward. There may be something worth borrowing in that.</blockquote>
+| Incendiary Grenades
+| valign="top" |<tabber>
+|-|Step 1 =
+* Deal 3,000 damage with [[Blaze Grenade|Blaze Grenades]]
+|-|Step 2 =
+* 5,000 Research Points
+* 5 [[Bombardier Cell]]
+</tabber>
+|-
+|
+=== '''Embedded Blast Engineering''' ===
+<blockquote>Armor does a good job against bullets. Small explosions are less respectful of the arrangement. Combining the two might be worth exploring.</blockquote>
+| X-Rounds
+| valign="top" |<tabber>
+|-|Step 1 =
+* Deal 1,000 Damage to [[Firefly|Fireflies]] using [[Light Impact Grenade|Light Impact Grenades]]
+* Deal 1,000 Damage to [[Hornet|Hornets]] using Light Impact Grenades
+* Deal 1,000 Damage to [[Fireball|Fireballs]] using Light Impact Grenades
+* Deal 1,000 Damage to [[Surveyor|Surveyors]] using Light Impact Grenades
+|-|Step 2 =
+* 5,000 Research Points
+* 5 [[Rocketeer Driver]]
+</tabber>
+|-
+|
+=== '''Extended Burst Cycles''' ===
+<blockquote>A burst has a beginning, a middle, and an end. The middle could probably use more bullets. Let's investigate.</blockquote>
+| Increased Burst
+| valign="top" |<tabber>
+|-|Step 1 =
+* Deal 10,000 damage with a Burst Burletta or Charged Burst [[Aphelion]]
+|-|Step 2 =
+* 5,000 Research Points
+* 10 [[Comet Igniter]]
+</tabber>
+|-
+|
+=== '''High-Voltage Exposure''' ===
+<blockquote>Some ARC machines appear capable of absorbing energy before putting it back to use. The same principle might be worth testing on something a little less insulated.</blockquote>
+| Charged Burst
+| valign="top" |<tabber>
+|-|Step 1 =
+* Destroy 5 [[ARC Turbine|ARC Turbines]]
+|-|Step 2 =
+* 5,000 Research Points
+* 5 [[Leaper Pulse Unit]]
+</tabber>
+|-
+|
+=== '''Magazine Geometry 101''' ===
+<blockquote>A standard magazine does its job, but it can only hold so much. Getting familiar with a drum-fed design could reveal how that extra room is put to use, and where the same idea might fit elsewhere.</blockquote>
+| Drum Mag
+| valign="top" |<tabber>
+|-|Step 1 =
+* Deal 15,000 damage to a [[Bastion]] with a [[Rattler]]
+* Destroy 1 Bastions with a Rattler
+|-|Step 2 =
+* 5,000 Research Points
+* 5 [[Bastion Cell]]
+</tabber>
+
+|-
+|
+=== '''Mobile-Fire Grip Fittings''' ===
+<blockquote>Fast movement is useful right up until a weapon needs to come into play. A weapon that keeps up with the pace would be useful.</blockquote>
+| Sprint Shooting
+|<tabber>
+|-|Step 1 =
+(In one round)
+* Visit the Electrical Substation
+* Visit the Truck Stop
+* Visit the Old Town
+* Visit the Almatera Station
+* Visit the Researcher Lodgings
+* Visit the Deep-Space Telescope
+* Visit the Commissary Supermarket
+|-|Step 2 =
+* 5,000 Research Points
+* 20 [[Skulker Targeter]]
+</tabber>
+|-
+|
+=== '''Shield Stress Testing''' ===
+<blockquote>Sustained damage could reveal exactly what makes a shield give out-and how to make that happen faster. For science, naturally.</blockquote>
+| Anti-Shield
+| valign="top" |<tabber>
+|-|Step 1 =
+* Deal 700 damage to encountered Raiders
+|-|Step 2 =
+* 5,000 Research Points
+* 2 [[Matriarch Reactor]]
+</tabber>
+|-
+|
+=== '''Solid-Core Casting Tech''' ===
+<blockquote>Shotgun engagements against drones offer a useful test of stopping power. Concentrating the full charge into a single projectile could produce far more decisive results.</blockquote>
+| Slug Rounds
+| valign="top" |<tabber>
+|-|Step 1 =
+* Destroy 50 Flying ARC using shotguns
+|-|Step 2 =
+* 5,000 Research Points
+* 20 [[Tick Pod]]
+</tabber>
+|-
+|
+=== '''Targeted Component Trial''' ===
+<blockquote>Even the toughest machines have their weak spots. Consistent strikes against vulnerable components could reveal a way to develop rounds that hit them where it hurts most. Metaphorically speaking.</blockquote>
+| Anti-Weak Point
+| valign="top" |<tabber>
+|-|Step 1 =
+* Destroy 40 thrusters on flying ARC enemies
+|-|Step 2 =
+* 5,000 Research Points
+* 20 [[Fireball Burner]]
+</tabber>
+|-
+|
+=== '''Thermite-Tipped Rounds''' ===
+<blockquote>Impact damage is useful. Setting the problem on fire afterward feels like a reasonable improvement.</blockquote>
+| Incendiary Rounds
+| valign="top" |<tabber>
+|-|Step 1 =
+* Destroy 30 [[Fireball|Fireballs]] with [[Explosive Mine|Explosive Mines]]
+|-|Step 2 =
+* 5,000 Research Points
+* 5 [[Firefly Burner]]
+</tabber>
+|-
+|
+=== '''Top Mounted Optics Retrofittings''' ===
+<blockquote>Elevated firing positions provide clear sightlines. Osprey field data under those conditions could support development of improved magnification.</blockquote>
+| Scoped
+| valign="top" |<tabber>
+|-|Step 1 =
+(In one round)
+* On [[Blue Gate]], head to Pilgrim's Peak
+* Deal 1,000 Damage to ARC enemies using the [[Osprey]]
+|-|Step 2 =
+* 5,000 Research Points
+* 14 [[Snitch Scanner]]
+</tabber>
+|-
+|
+=== '''Trigger Reset Systems''' ===
+<blockquote>Fast-moving threats leave little margin for hesitation. Close encounters with Skulkers could reveal ways to improve paced combat effectiveness.</blockquote>
+| Semi-Auto
+| valign="top" |<tabber>
+|-|Step 1 =
+* Destroy 5 [[Skulker|Skulkers]] with a [[Raider Tool]]
+|-|Step 2 =
+* 5,000 Research Points
+* 4 [[Vaporizer Regulator]]
+</tabber>
+|}

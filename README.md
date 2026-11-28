@@ -12,6 +12,18 @@ python3 -m http.server 8000
 # otwórz http://localhost:8000
 ```
 
+## Testy
+
+```sh
+node --test tests/calc.test.mjs                # kalkulator (calcRun z index.html, w vm z namiastką DOM)
+python3 -m unittest discover tests             # parsery tekstu z wiki na zapisanych stronach (tests/fixtures/)
+ARC_LIVE=1 python3 -m unittest discover tests  # do tego parsery na aktualnych stronach wiki
+```
+
+Test „live” pokazuje, że wiki zmieniła format stron Amplified Weapons / Amplified Research albo sekcji „Sources”.
+Po poprawie parsera: `python3 tests/refresh_fixtures.py` i uzupełnij oczekiwania w `tests/test_parsers.py`.
+Testy kalkulatora korzystają z haczyka `globalThis.__arcTest` na końcu skryptu strony.
+
 ## arc.billy.pl
 
 Strona jest hostowana na Pi jako aplikacja homelaba `services/games/arc-atlas` (szczegóły w jej README).

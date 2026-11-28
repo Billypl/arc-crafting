@@ -1,0 +1,42 @@
+{{Infobox item
+| image         = Adrenaline Shot.png
+| name          = Adrenaline Shot
+| rarity        = Common
+| quote         = A serum that fully restores stamina and temporarily increases stamina regeneration.
+| type          = Quick Use-Regen
+| location      =
+| weight        = 0.2
+| sellprice     = 300
+| stacksize     = 5
+| stamina       = 5/s
+| usetime       = 1s
+| duration      = 10s
+}}
+The '''Adrenaline Shot''' is a Common [[Quick Use#Healing|Healing Item]] that can be used to fully replenish stamina and to temporary increase its regeneration.
+
+== Sources ==
+* Scavenging
+* Crafting
+* Sold by [[Lance]] ({{Price|900}})
+* Quests: {{Sourced from quests}}
+
+== Required Materials to Craft ==
+{{Crafting
+ | ingredients = 3 Chemicals + 3 Plastic Parts
+ | station = Medical Lab 1
+ | skill = 
+ | blueprint = n
+}}
+
+{{Crafting
+ | ingredients = 3 Chemicals + 3 Plastic Parts
+ | station = Inventory
+ | skill = In-Round Crafting
+ | blueprint = n
+}}
+
+== Recycled & Salvaged Material ==
+{{Recycling table
+| recycling1 = 1 Chemicals + 1 Plastic Parts
+| salvaging1 = 1 Chemicals
+}}

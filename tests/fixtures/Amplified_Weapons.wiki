@@ -1,0 +1,689 @@
+<blockquote>
+This page is about '''Amplified Weapons'''. For information about '''Amplifications''' themselves, see also [[Amplification]].
+</blockquote>
+
+'''Amplified Weapons''' are a set of weapons that can be upgraded to '''Level 5''', unlocking '''Amplification''' slots that allow raiders to modify weapon functionality.
+
+== Requirements ==
+To upgrade weapons to Level 5 and activate Amplifications, raiders must upgrade the following [[Workshop|workshops]]:
+* '''[[Gunsmith]]''' Level 4
+* [[Research Station|'''Research Station''']] Level 4
+
+== Upgrading ==
+Upgrading a weapon to Level 5 requires a specific '''Amplification Module''' matching the weapon's base rarity tier:
+
+{| class="wikitable" style="text-align: center;"
+! Rarity Tier !! Required Upgrade Material
+|-
+| Common || [[Amplification Module Mk. I]]
+|-
+| Uncommon || [[Amplification Module Mk. II]]
+|-
+| Rare || [[Amplification Module Mk. III]]
+|-
+| Epic || [[Amplification Module Mk. IV]]
+|-
+| Legendary || [[Amplification Module Mk. V]]
+|}
+
+Amplification Modules can be acquired from:
+
+* the [[Fallen Emperor]] using an [[Emperor Gateway Conduit]] on [[Pendola Pass]],
+* the cargo inside the [[ARC Frigate (lore)|ARC Frigate]] during the [[ARC Frigate]] event.
+
+Upon reaching Level 5, all weapons immediately gain '''+70 Max Durability'''.
+== Repairing ==
+Repairing Level 5 weapons require [[Amplified Fragments]]. Repair buffs acquired from [[Expedition|expeditions]] are percentage based, so Level 5 weapons greatly benefit from it.
+
+Knocked out raiders drop amplified weapons with their durability reduced to 10%.
+
+== System Mechanics ==
+Once a weapon reaches Level 5, players can select and activate available Amplifications. Once an Amplification is activated, it cannot be removed or changed.
+
+Certain amplifications may be unavailable:
+
+* until the corresponding [[Amplified Research]] is completed in the [[Research Station]],
+* until prior amplifications are activated first (e.g., ''Charged Burst'' requires ''Increased Burst''),
+* because another amplification conflicts with it (e.g., ''Burst-Fire'' locks out ''Full-Auto'').
+
+== Assault Rifles ==
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(24rem, 1fr)); gap: 1.25em; align-items: start; margin: 1em 0 2em;">
+
+<div id="Kettle" style="border: 1px solid var(--border-color-base, rgba(128, 128, 128, 0.3)); border-radius: 8px; padding: 1em;">
+<div style="text-align: center; margin-bottom: 1em; font-size: 1.1em; font-weight: bold;">
+{{ILink|Kettle|2=Kettle V|3=128|4=Kettle_IV}}
+</div>
+{| class="wikitable wikitable--fluid" style="width: 100%; margin-bottom: 0.8em;"
+! style="text-align: left; font-size: 1.1em; font-weight: bold; border-left: 4px solid var(--color-emphasized);" | X-Rounds
+|-
+| Adds an explosive compound to the projectile, dealing slightly increased damage to Raiders and significantly increased damage to ARC Armor plating.
+* +6.5 Base Damage
+* 400% Increased Damage vs ARC Armor
+* 15% Increased Vertical Recoil
+* 15% Increased Horizontal Recoil
+* 30% Reduced Bullet Velocity
+* 20% Reduced Fire Rate
+* -4 Magazine Size
+|-
+|
+'''Research:''' [[Amplified Research#Embedded Blast Engineering|Embedded Blast Engineering]]<br />
+'''Materials:''' 3 [[Fossilized Lightning]]<br />
+'''Conflicts:''' Anti-Shield, Full-Auto, Magazine Mod
+|}
+{| class="wikitable wikitable--fluid" style="width: 100%; margin-bottom: 0.8em;"
+! style="text-align: left; font-size: 1.1em; font-weight: bold; border-left: 4px solid var(--color-emphasized);" | Anti-Shield
+|-
+| Redistributes damage to prioritize breaking shields faster.
+* 100% Increased Damage vs Raider Shields
+* -2 Base Damage
+|-
+|
+'''Research:''' [[Amplified Research#Shield Stess Testing|Shield Stess Testing]]<br />
+'''Materials:''' 3 [[Assessor Matrix]]<br />
+'''Conflicts:''' X-Rounds
+|}
+{| class="wikitable wikitable--fluid" style="width: 100%; margin-bottom: 0;"
+! style="text-align: left; font-size: 1.1em; font-weight: bold; border-left: 4px solid var(--color-emphasized);" | Full-Auto
+|-
+| Makes the weapon fully automatic, at the cost of accuracy and stability.
+* 15% Increased Fire Rate
+* 20% Reduced Headshot Damage Multiplier
+* 30% Increased Vertical Recoil
+* 30% Increased Horizontal Recoil
+* 30% Increased Max Shot Dispersion
+|-
+|
+'''Materials:''' 3 [[Pneumatic Actuator]]<br />
+'''Conflicts:''' X-Rounds
+|}
+</div>
+
+<div id="Rattler" style="border: 1px solid var(--border-color-base, rgba(128, 128, 128, 0.3)); border-radius: 8px; padding: 1em;">
+<div style="text-align: center; margin-bottom: 1em; font-size: 1.1em; font-weight: bold;">
+{{ILink|Rattler|2=Rattler V|3=128|4=Rattler_IV}}
+</div>
+{| class="wikitable wikitable--fluid" style="width: 100%; margin-bottom: 0.8em;"
+! style="text-align: left; font-size: 1.1em; font-weight: bold; border-left: 4px solid var(--color-emphasized);" | More Reload
+|-
+| Increases the number of bullets loaded at a time, reducing reload time.
+* +2 Bullets Loaded at a time
+|-
+|
+'''Materials:''' 2 [[Propellant Valve Assembly]]
+|}
+{| class="wikitable wikitable--fluid" style="width: 100%; margin-bottom: 0.8em;"
+! style="text-align: left; font-size: 1.1em; font-weight: bold; border-left: 4px solid var(--color-emphasized);" | Drum Mag
+|-
+| Significantly increases magazine capacity by attaching a drum mag. However, it must still be reloaded a couple of bullets at time.
+* +40 Magazine Size
+* 50% Increased Vertical Recoil
+* 50% Increased Horizontal Recoil
+* 30% Increased Max Shot Dispersion
+* 30% Increased Base Dispersion
+* 30% Increased ADS Dispersion
+* 10% Reduced ADS Speed
+|-
+|
+'''Research:''' [[Amplified Research#Magazine Geometry 101|Magazine Geometry 101]]<br />
+'''Materials:''' 4 [[Pressure Regulator]]<br />
+'''Requires:''' More Reload
+|}
+{| class="wikitable wikitable--fluid" style="width: 100%; margin-bottom: 0;"
+! style="text-align: left; font-size: 1.1em; font-weight: bold; border-left: 4px solid var(--color-emphasized);" | Incendiary Rounds
+|-
+| Adds an incendiary compound to the projectile, setting targets on fire when hit.
+* +5/s Burn Damage
+* +2s Burn Duration
+|-
+|
+'''Research:''' [[Amplified Research#Thermite-Tipped Rounds|Thermite-Tipped Rounds]]<br />
+'''Materials:''' 3 [[Fossilized Lightning]]
+|}
+</div>
+
+<div id="Bettina" style="border: 1px solid var(--border-color-base, rgba(128, 128, 128, 0.3)); border-radius: 8px; padding: 1em;">
+<div style="text-align: center; margin-bottom: 1em; font-size: 1.1em; font-weight: bold;">
+{{ILink|Bettina|2=Bettina V|3=128|4=Bettina_IV}}
+</div>
+{| class="wikitable wikitable--fluid" style="width: 100%; margin-bottom: 0.8em;"
+! style="text-align: left; font-size: 1.1em; font-weight: bold; border-left: 4px solid var(--color-emphasized);" | Bigger Mag
+|-
+| Increases the magazine capacity.
+* +15 Magazine Size
+|-
+|
+'''Materials:''' 3 [[Pressure Regulator]]<br />
+'''Conflicts:''' Semi-Auto
+|}
+{| class="wikitable wikitable--fluid" style="width: 100%; margin-bottom: 0.8em;"
+! style="text-align: left; font-size: 1.1em; font-weight: bold; border-left: 4px solid var(--color-emphasized);" | Semi-Auto
+|-
+| Makes the weapon semi-automatic.
+* +3 Base Damage
+* 20% Reduced Max Shot Dispersion
+* 20% Reduced Fire Rate
+|-
+|
+'''Research:''' [[Amplified Research#Trigger Reset Systems|Trigger Reset Systems]]<br />
+'''Materials:''' 3 [[Pneumatic Actuator]]<br />
+'''Conflicts:''' Bigger Mag
+|}
+{| class="wikitable wikitable--fluid" style="width: 100%; margin-bottom: 0;"
+! style="text-align: left; font-size: 1.1em; font-weight: bold; border-left: 4px solid var(--color-emphasized);" | X-Rounds
+|-
+| Adds an explosive compound to the projectile, dealing slightly increased damage to Raiders and significantly increased damage to ARC Armor plating.
+* +3 Base Damage
+* 25% Increased Damage vs ARC Armor
+* 20% Increased Vertical Recoil
+* 20% Increased Horizontal Recoil
+* 30% Reduced Bullet Velocity
+* -4 Magazine Size
+|-
+|
+'''Research:''' [[Amplified Research#Embedded Blast Engineering|Embedded Blast Engineering]]<br />
+'''Materials:''' 3 [[Fossilized Lightning]]<br />
+'''Requires:''' Semi-Auto<br />
+'''Conflicts:''' Bigger Mag
+|}
+</div>
+
+</div>
+
+== Battle Rifles ==
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(24rem, 1fr)); gap: 1.25em; align-items: start; margin: 1em 0 2em;">
+
+<div id="Renegade" style="border: 1px solid var(--border-color-base, rgba(128, 128, 128, 0.3)); border-radius: 8px; padding: 1em;">
+<div style="text-align: center; margin-bottom: 1em; font-size: 1.1em; font-weight: bold;">
+{{ILink|Renegade|2=Renegade V|3=128|4=Renegade_IV}}
+</div>
+{| class="wikitable wikitable--fluid" style="width: 100%; margin-bottom: 0.8em;"
+! style="text-align: left; font-size: 1.1em; font-weight: bold; border-left: 4px solid var(--color-emphasized);" | More Reload
+|-
+| Increases the number of bullets loaded at a time, reducing reload time.
+* +1 Bullets Loaded at a time
+|-
+|
+'''Materials:''' 2 [[Propellant Valve Assembly]]
+|}
+{| class="wikitable wikitable--fluid" style="width: 100%; margin-bottom: 0;"
+! style="text-align: left; font-size: 1.1em; font-weight: bold; border-left: 4px solid var(--color-emphasized);" | Scoped
+|-
+| Adds a scope to the weapon, allowing it to be fired from a scoped view.
+|-
+|
+'''Research:''' [[Amplified Research#Top Mounted Optics Retrofittings|Top Mounted Optics Retrofittings]]<br />
+'''Materials:''' 4 [[Fluted Rotor Core]]<br />
+'''Conflicts:''' Magazine Mod
+|}
+</div>
+
+<div id="Aphelion" style="border: 1px solid var(--border-color-base, rgba(128, 128, 128, 0.3)); border-radius: 8px; padding: 1em;">
+<div style="text-align: center; margin-bottom: 1em; font-size: 1.1em; font-weight: bold;">
+{{ILink|Aphelion|2=Aphelion V|3=128|4=Aphelion}}
+</div>
+{| class="wikitable wikitable--fluid" style="width: 100%; margin-bottom: 0.8em;"
+! style="text-align: left; font-size: 1.1em; font-weight: bold; border-left: 4px solid var(--color-emphasized);" | Bigger Mag
+|-
+| Increases the magazine capacity.
+* +6 Magazine Size
+|-
+|
+'''Materials:''' 3 [[Pressure Regulator]]
+|}
+{| class="wikitable wikitable--fluid" style="width: 100%; margin-bottom: 0.8em;"
+! style="text-align: left; font-size: 1.1em; font-weight: bold; border-left: 4px solid var(--color-emphasized);" | Charged Burst
+|-
+| Changes the firing mode to charge and release. The longer the charge is held, the more projectiles are fired upon release.
+* +2 Max Projectiles in Burst
+* +2 Magazine Size
+* -2.5 Base Damage
+* 60% Increased Vertical Recoil
+* 60% Increased Horizontal Recoil
+|-
+|
+'''Research:''' [[Amplified Research#High-Voltage Exposure|High-Voltage Exposure]]<br />
+'''Materials:''' 2 [[Queen Reactor]]
+|}
+{| class="wikitable wikitable--fluid" style="width: 100%; margin-bottom: 0.8em;"
+! style="text-align: left; font-size: 1.1em; font-weight: bold; border-left: 4px solid var(--color-emphasized);" | Increased Burst
+|-
+| Increases the number of projectiles fired within a burst.
+* +2 Max Projectiles in Burst
+|-
+|
+'''Research:''' [[Amplified Research#Extended Burst Cycles|Extended Burst Cycles]]<br />
+'''Materials:''' 2 [[Pressure Regulator]]<br />
+'''Requires:''' Charged Burst
+|}
+{| class="wikitable wikitable--fluid" style="width: 100%; margin-bottom: 0;"
+! style="text-align: left; font-size: 1.1em; font-weight: bold; border-left: 4px solid var(--color-emphasized);" | Incendiary Rounds
+|-
+| Adds an incendiary compound to the projectile, setting targets on fire when hit.
+* +5/s Burn Damage
+* +2s Burn Duration
+|-
+|
+'''Research:''' [[Amplified Research#Thermite-Tipped Rounds|Thermite-Tipped Rounds]]<br />
+'''Materials:''' 3 [[Fossilized Lightning]]
+|}
+</div>
+
+</div>
+
+== SMGs ==
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(24rem, 1fr)); gap: 1.25em; align-items: start; margin: 1em 0 2em;">
+
+<div id="Canto" style="border: 1px solid var(--border-color-base, rgba(128, 128, 128, 0.3)); border-radius: 8px; padding: 1em;">
+<div style="text-align: center; margin-bottom: 1em; font-size: 1.1em; font-weight: bold;">
+{{ILink|Canto|2=Canto V|3=128|4=Canto_IV}}
+</div>
+{| class="wikitable wikitable--fluid" style="width: 100%; margin-bottom: 0.8em;"
+! style="text-align: left; font-size: 1.1em; font-weight: bold; border-left: 4px solid var(--color-emphasized);" | Carbine Conversion
+|-
+| Repurposes the Canto as a carbine, greatly improving stability and accuracy at the cost of agility.
+* 50% Reduced ADS Recoil
+* 20% Reduced Max Shot Dispersion
+* 20% Reduced Per-Shot Dispersion
+* 20% Reduced Base Dispersion
+* 10% Reduced Fire Rate
+* 20% Increased Equip Time
+* 20% Increased Unequip Time
+|-
+|
+'''Materials:''' 3 [[Propellant Valve Assembly]]<br />
+'''Conflicts:''' Sprint Shooting, Stock Mod
+|}
+{| class="wikitable wikitable--fluid" style="width: 100%; margin-bottom: 0.8em;"
+! style="text-align: left; font-size: 1.1em; font-weight: bold; border-left: 4px solid var(--color-emphasized);" | Sprint Shooting
+|-
+| Ergonomic fittings that allow the weapon to be comfortably fired while sprinting.
+|-
+|
+'''Research:''' [[Amplified Research#Mobile-Fire Grip Fittings|Mobile-Fire Grip Fittings]]<br />
+'''Materials:''' 4 [[Fluted Rotor Core]]<br />
+'''Conflicts:''' Carbine Conversion, Stock Mod
+|}
+{| class="wikitable wikitable--fluid" style="width: 100%; margin-bottom: 0;"
+! style="text-align: left; font-size: 1.1em; font-weight: bold; border-left: 4px solid var(--color-emphasized);" | Incendiary Rounds
+|-
+| Adds an incendiary compound to the projectile, setting targets on fire when hit.
+* +5/s Burn Damage
+* +2s Burn Duration
+|-
+|
+'''Research:''' [[Amplified Research#Thermite-Tipped Rounds|Thermite-Tipped Rounds]]<br />
+'''Materials:''' 3 [[Fossilized Lightning]]
+|}
+</div>
+
+</div>
+
+== Shotguns ==
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(24rem, 1fr)); gap: 1.25em; align-items: start; margin: 1em 0 2em;">
+
+<div id="Il Toro" style="border: 1px solid var(--border-color-base, rgba(128, 128, 128, 0.3)); border-radius: 8px; padding: 1em;">
+<div style="text-align: center; margin-bottom: 1em; font-size: 1.1em; font-weight: bold;">
+{{ILink|Il Toro|2=Il Toro V|3=128|4=Il_Toro_IV}}
+</div>
+{| class="wikitable wikitable--fluid" style="width: 100%; margin-bottom: 0.8em;"
+! style="text-align: left; font-size: 1.1em; font-weight: bold; border-left: 4px solid var(--color-emphasized);" | More Reload
+|-
+| Increases the number of bullets loaded at a time, reducing reload time.
+* +1 Shells Loaded at a time
+|-
+|
+'''Materials:''' 2 [[Propellant Valve Assembly]]
+|}
+{| class="wikitable wikitable--fluid" style="width: 100%; margin-bottom: 0;"
+! style="text-align: left; font-size: 1.1em; font-weight: bold; border-left: 4px solid var(--color-emphasized);" | Slug Rounds
+|-
+| Replaces the normal shotgun shells with a single large projectile that deals massive damage.
+* -8 Projectiles Per Shot
+* 900% Increased Projectile Damage
+* 200% Increased Damage vs ARC Armor (1.5x)
+* 40% Reduced Base Dispersion
+* 50% Reduced Bullet Velocity
+|-
+|
+'''Research:''' [[Amplified Research#Solid-Core Casting Tech|Solid-Core Casting Tech]]<br />
+'''Materials:''' 4 [[Turbine Compressor]]
+|}
+</div>
+
+</div>
+
+== Pistols ==
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(24rem, 1fr)); gap: 1.25em; align-items: start; margin: 1em 0 2em;">
+
+<div id="Hairpin" style="border: 1px solid var(--border-color-base, rgba(128, 128, 128, 0.3)); border-radius: 8px; padding: 1em;">
+<div style="text-align: center; margin-bottom: 1em; font-size: 1.1em; font-weight: bold;">
+{{ILink|Hairpin|2=Hairpin V|3=128|4=Hairpin_IV}}
+</div>
+{| class="wikitable wikitable--fluid" style="width: 100%; margin-bottom: 0.8em;"
+! style="text-align: left; font-size: 1.1em; font-weight: bold; border-left: 4px solid var(--color-emphasized);" | Incendiary Rounds
+|-
+| Adds an incendiary compound to the projectile, setting targets on fire when hit.
+* +5/s Burn Damage
+* +2s Burn Duration
+|-
+|
+'''Research:''' [[Amplified Research#Thermite-Tipped Rounds|Thermite-Tipped Rounds]]<br />
+'''Materials:''' 3 [[Fossilized Lightning]]<br />
+'''Conflicts:''' Semi-Auto, Tracker Rounds
+|}
+{| class="wikitable wikitable--fluid" style="width: 100%; margin-bottom: 0.8em;"
+! style="text-align: left; font-size: 1.1em; font-weight: bold; border-left: 4px solid var(--color-emphasized);" | Semi-Auto
+|-
+| Makes the weapon semi-automatic.
+* 150% Increased Fire Rate
+* 20% Reduced Headshot Damage Multiplier
+* 40% Increased Per-Shot Dispersion
+|-
+|
+'''Research:''' [[Amplified Research#Trigger Reset Systems|Trigger Reset Systems]]<br />
+'''Materials:''' 3 [[Pneumatic Actuator]]<br />
+'''Conflicts:''' Incendiary Rounds, Tracker Rounds
+|}
+{| class="wikitable wikitable--fluid" style="width: 100%; margin-bottom: 0.8em;"
+! style="text-align: left; font-size: 1.1em; font-weight: bold; border-left: 4px solid var(--color-emphasized);" | Sprint Shooting
+|-
+| Ergonomic fittings that allow the weapon to be comfortably fired while sprinting.
+|-
+|
+'''Research:''' [[Amplified Research#Mobile-Fire Grip Fittings|Mobile-Fire Grip Fittings]]<br />
+'''Materials:''' 3 [[Fluted Rotor Core]]<br />
+'''Requires:''' Semi-Auto
+|}
+{| class="wikitable wikitable--fluid" style="width: 100%; margin-bottom: 0;"
+! style="text-align: left; font-size: 1.1em; font-weight: bold; border-left: 4px solid var(--color-emphasized);" | Tracker Rounds
+|-
+| Replaces the bullets with tracker rounds that briefly reveal the position of targets they hit.
+* +5s Tracking Duration
+|-
+|
+'''Materials:''' 1 [[Matriarch Reactor]]<br />
+'''Conflicts:''' Incendiary Rounds, Semi-Auto
+|}
+</div>
+
+<div id="Burletta" style="border: 1px solid var(--border-color-base, rgba(128, 128, 128, 0.3)); border-radius: 8px; padding: 1em;">
+<div style="text-align: center; margin-bottom: 1em; font-size: 1.1em; font-weight: bold;">
+{{ILink|Burletta|2=Burletta V|3=128|4=Burletta_IV}}
+</div>
+{| class="wikitable wikitable--fluid" style="width: 100%; margin-bottom: 0.8em;"
+! style="text-align: left; font-size: 1.1em; font-weight: bold; border-left: 4px solid var(--color-emphasized);" | Burst Fire
+|-
+| Makes the weapon fire in a burst.
+* +2 Projectiles in Burst
+|-
+|
+'''Research:''' [[Amplified Research#Burst Assembly Recovery|Burst Assembly Recovery]]<br />
+'''Materials:''' 2 [[Queen Reactor]]<br />
+'''Conflicts:''' Full-Auto
+|}
+{| class="wikitable wikitable--fluid" style="width: 100%; margin-bottom: 0.8em;"
+! style="text-align: left; font-size: 1.1em; font-weight: bold; border-left: 4px solid var(--color-emphasized);" | Increased Burst
+|-
+| Increases the number of projectiles fired within a burst.
+* +2 Projectiles in Burst
+* +3 Magazine Size
+|-
+|
+'''Research:''' [[Amplified Research#Extended Burst Cycles|Extended Burst Cycles]]<br />
+'''Materials:''' 2 [[Pressure Regulator]]<br />
+'''Requires:''' Burst Fire
+|}
+{| class="wikitable wikitable--fluid" style="width: 100%; margin-bottom: 0.8em;"
+! style="text-align: left; font-size: 1.1em; font-weight: bold; border-left: 4px solid var(--color-emphasized);" | Full-Auto
+|-
+| Makes the weapon fully automatic, at the cost of accuracy and stability.
+* 60% Increased Fire Rate
+* -2 Base Damage
+* 60% Reduced Headshot Damage Multiplier
+* 50% Increased Vertical Recoil
+* 50% Increased Horizontal Recoil
+* 100% Increased Dispersion Recovery Time
+* 50% Increased Base Dispersion
+* 50% Increased ADS Dispersion
+|-
+|
+'''Materials:''' 3 [[Pneumatic Actuator]]<br />
+'''Conflicts:''' Burst Fire
+|}
+{| class="wikitable wikitable--fluid" style="width: 100%; margin-bottom: 0;"
+! style="text-align: left; font-size: 1.1em; font-weight: bold; border-left: 4px solid var(--color-emphasized);" | Sprint Shooting
+|-
+| Ergonomic fittings that allow the weapon to be comfortably fired while sprinting.
+|-
+|
+'''Research:''' [[Amplified Research#Mobile-Fire Grip Fittings|Mobile-Fire Grip Fittings]]<br />
+'''Materials:''' 4 [[Fluted Rotor Core]]
+|}
+</div>
+
+</div>
+
+== Hand Cannons ==
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(24rem, 1fr)); gap: 1.25em; align-items: start; margin: 1em 0 2em;">
+
+<div id="Anvil" style="border: 1px solid var(--border-color-base, rgba(128, 128, 128, 0.3)); border-radius: 8px; padding: 1em;">
+<div style="text-align: center; margin-bottom: 1em; font-size: 1.1em; font-weight: bold;">
+{{ILink|Anvil|2=Anvil V|3=128|4=Anvil_IV}}
+</div>
+{| class="wikitable wikitable--fluid" style="width: 100%; margin-bottom: 0.8em;"
+! style="text-align: left; font-size: 1.1em; font-weight: bold; border-left: 4px solid var(--color-emphasized);" | X-Rounds
+|-
+| Adds an explosive compound to the projectile, dealing slightly increased damage to Raiders and significantly increased damage to ARC Armor plating.
+* +5 Base Damage
+* 33% Increased Damage vs ARC Armor
+* 10% Reduced Headshot Damage Multiplier
+* 30% Increased Vertical Recoil
+* 30% Increased Horizontal Recoil
+* 50% Reduced Bullet Velocity
+|-
+|
+'''Research:''' [[Amplified Research#Embedded Blast Engineering|Embedded Blast Engineering]]<br />
+'''Materials:''' 3 [[Fossilized Lightning]]<br />
+'''Conflicts:''' Anvil Splitter
+|}
+{| class="wikitable wikitable--fluid" style="width: 100%; margin-bottom: 0;"
+! style="text-align: left; font-size: 1.1em; font-weight: bold; border-left: 4px solid var(--color-emphasized);" | Anvil Splitter
+|-
+| Replaces the Anvil's bullets with rounds that split into four weaker projectiles.
+* +3 Projectiles Per Shot
+* 30% Reduced Base Dispersion
+* 90% Reduced Dispersion Recovery Time
+* 40% Increased ADS Dispersion
+* 70% Reduced Projectile Damage
+* 40% Reduced Headshot Damage Multiplier
+|-
+|
+'''Materials:''' 3 [[Turbine Compressor]]<br />
+'''Conflicts:''' X-Rounds
+|}
+</div>
+
+</div>
+
+== Sniper Rifles ==
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(24rem, 1fr)); gap: 1.25em; align-items: start; margin: 1em 0 2em;">
+
+<div id="Osprey" style="border: 1px solid var(--border-color-base, rgba(128, 128, 128, 0.3)); border-radius: 8px; padding: 1em;">
+<div style="text-align: center; margin-bottom: 1em; font-size: 1.1em; font-weight: bold;">
+{{ILink|Osprey|2=Osprey V|3=128|4=Osprey_IV}}
+</div>
+{| class="wikitable wikitable--fluid" style="width: 100%; margin-bottom: 0.8em;"
+! style="text-align: left; font-size: 1.1em; font-weight: bold; border-left: 4px solid var(--color-emphasized);" | Tracker Rounds
+|-
+| Replaces the bullets with tracker rounds that briefly reveal the position of targets they hit.
+* +5s Tracking Duration
+* 60% Reduced Bullet Velocity
+|-
+|
+'''Materials:''' 2 [[Matriarch Reactor]]<br />
+'''Conflicts:''' Anti-Weak Point
+|}
+{| class="wikitable wikitable--fluid" style="width: 100%; margin-bottom: 0.8em;"
+! style="text-align: left; font-size: 1.1em; font-weight: bold; border-left: 4px solid var(--color-emphasized);" | Anti-Weak Point
+|-
+| Deals increased damage to ARC weak points, but deals less damage to ARC armor plating.
+* 100% Increased Damage vs ARC Weak Points
+|-
+|
+'''Research:''' [[Amplified Research#Targeted Component Trial|Targeted Component Trial]]<br />
+'''Materials:''' 2 [[Assessor Matrix]]<br />
+'''Conflicts:''' Tracker Rounds
+|}
+{| class="wikitable wikitable--fluid" style="width: 100%; margin-bottom: 0;"
+! style="text-align: left; font-size: 1.1em; font-weight: bold; border-left: 4px solid var(--color-emphasized);" | Ergonomic Bolt
+|-
+| Ergonomic bolt that allows the user to perform the bolt-action while scoped.
+|-
+|
+'''Research:''' [[Amplified Research#Action Economy|Action Economy]]<br />
+'''Materials:''' 3 [[Fluted Rotor Core]]<br />
+'''Conflicts:''' Stock Mod
+|}
+</div>
+
+<div id="Jupiter" style="border: 1px solid var(--border-color-base, rgba(128, 128, 128, 0.3)); border-radius: 8px; padding: 1em;">
+<div style="text-align: center; margin-bottom: 1em; font-size: 1.1em; font-weight: bold;">
+{{ILink|Jupiter|2=Jupiter V|3=128|4=Jupiter}}
+</div>
+{| class="wikitable wikitable--fluid" style="width: 100%; margin-bottom: 0.8em;"
+! style="text-align: left; font-size: 1.1em; font-weight: bold; border-left: 4px solid var(--color-emphasized);" | Bigger Mag
+|-
+| Increases the magazine capacity.
+* +5 Magazine Size
+|-
+|
+'''Materials:''' 3 [[Pressure Regulator]]
+|}
+{| class="wikitable wikitable--fluid" style="width: 100%; margin-bottom: 0.8em;"
+! style="text-align: left; font-size: 1.1em; font-weight: bold; border-left: 4px solid var(--color-emphasized);" | Scoped
+|-
+| Adds a scope to the weapon, allowing it to be fired from a scoped view.
+|-
+|
+'''Research:''' [[Amplified Research#Top Mounted Optics Retrofittings|Top Mounted Optics Retrofittings]]<br />
+'''Materials:''' 3 [[Fluted Rotor Core]]
+|}
+{| class="wikitable wikitable--fluid" style="width: 100%; margin-bottom: 0;"
+! style="text-align: left; font-size: 1.1em; font-weight: bold; border-left: 4px solid var(--color-emphasized);" | Ergonomic Bolt
+|-
+| Ergonomic bolt that allows the user to perform the bolt-action while scoped.
+|-
+|
+'''Research:''' [[Amplified Research#Action Economy|Action Economy]]<br />
+'''Materials:''' 3 [[Fluted Rotor Core]]
+|}
+</div>
+
+</div>
+
+== Specials ==
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(24rem, 1fr)); gap: 1.25em; align-items: start; margin: 1em 0 2em;">
+
+<div id="Rascal" style="border: 1px solid var(--border-color-base, rgba(128, 128, 128, 0.3)); border-radius: 8px; padding: 1em;">
+<div style="text-align: center; margin-bottom: 1em; font-size: 1.1em; font-weight: bold;">
+{{ILink|Rascal|2=Rascal V|3=128|4=Rascal_IV}}
+</div>
+{| class="wikitable wikitable--fluid" style="width: 100%; margin-bottom: 0.8em;"
+! style="text-align: left; font-size: 1.1em; font-weight: bold; border-left: 4px solid var(--color-emphasized);" | High Velocity
+|-
+| Increases the velocity of the projectile fired.
+* 100% Increased Projectile Velocity
+* 50% Reduced ADS Dispersion
+|-
+|
+'''Materials:''' 2 [[Pneumatic Actuator]]
+|}
+{| class="wikitable wikitable--fluid" style="width: 100%; margin-bottom: 0.8em;"
+! style="text-align: left; font-size: 1.1em; font-weight: bold; border-left: 4px solid var(--color-emphasized);" | Sprint Shooting
+|-
+| Ergonomic fittings that allow the weapon to be comfortably fired while sprinting.
+|-
+|
+'''Research:''' [[Amplified Research#Mobile-Fire Grip Fittings|Mobile-Fire Grip Fittings]]<br />
+'''Materials:''' 2 [[Fluted Rotor Core]]
+|}
+{| class="wikitable wikitable--fluid" style="width: 100%; margin-bottom: 0;"
+! style="text-align: left; font-size: 1.1em; font-weight: bold; border-left: 4px solid var(--color-emphasized);" | Incendiary Grenades
+|-
+| Adds an incendiary compound to the projectile, causing it to spread fire when detonating on ARC.
+* +11.25/s Burn Damage
+* +5s Burn Duration
+* 40% Reduced Projectile Damage
+* 15% Reduced Projectile Velocity
+|-
+|
+'''Research:''' [[Amplified Research#Compact Combustion Charges|Compact Combustion Charges]]<br />
+'''Materials:''' 3 [[Fossilized Lightning]]
+|}
+</div>
+
+<div id="Hullcracker" style="border: 1px solid var(--border-color-base, rgba(128, 128, 128, 0.3)); border-radius: 8px; padding: 1em;">
+<div style="text-align: center; margin-bottom: 1em; font-size: 1.1em; font-weight: bold;">
+{{ILink|Hullcracker|2=Hullcracker V|3=128|4=Hullcracker_IV}}
+</div>
+{| class="wikitable wikitable--fluid" style="width: 100%; margin-bottom: 0.8em;"
+! style="text-align: left; font-size: 1.1em; font-weight: bold; border-left: 4px solid var(--color-emphasized);" | Incendiary Grenades
+|-
+| Adds an incendiary compound to the projectile, causing it to spread fire when detonating on ARC.
+* +11.25/s Burn Damage
+* +5s Burn Duration
+* 40% Reduced Projectile Damage
+* 50% Reduced Projectile Velocity
+|-
+|
+'''Research:''' [[Amplified Research#Compact Combustion Charges|Compact Combustion Charges]]<br />
+'''Materials:''' 3 [[Fossilized Lightning]]
+|}
+{| class="wikitable wikitable--fluid" style="width: 100%; margin-bottom: 0;"
+! style="text-align: left; font-size: 1.1em; font-weight: bold; border-left: 4px solid var(--color-emphasized);" | Mag Reload
+|-
+| Removes the need to reload one projectile at a time.
+|-
+|
+'''Materials:''' 3 [[Propellant Valve Assembly]]
+|}
+</div>
+
+<div id="Equalizer" style="border: 1px solid var(--border-color-base, rgba(128, 128, 128, 0.3)); border-radius: 8px; padding: 1em;">
+<div style="text-align: center; margin-bottom: 1em; font-size: 1.1em; font-weight: bold;">
+{{ILink|Equalizer|2=Equalizer V|3=128|4=Equalizer}}
+</div>
+{| class="wikitable wikitable--fluid" style="width: 100%; margin-bottom: 0.8em;"
+! style="text-align: left; font-size: 1.1em; font-weight: bold; border-left: 4px solid var(--color-emphasized);" | Ramping Damage
+|-
+| Gradually increases the Equalizer's damage while its laser remains in contact with a valid target.
+|-
+|
+'''Research:''' [[Amplified Research#Beam Resonance Tech|Beam Resonance Tech]]<br />
+'''Materials:''' 3 [[Queen Reactor]]<br />
+'''Conflicts:''' Anti-Weak Point
+|}
+{| class="wikitable wikitable--fluid" style="width: 100%; margin-bottom: 0.8em;"
+! style="text-align: left; font-size: 1.1em; font-weight: bold; border-left: 4px solid var(--color-emphasized);" | Anti-Weak Point
+|-
+| Deals increased damage to ARC weak points, but deals less damage to ARC armor plating.
+* 67% Increased Damage vs ARC Weak Points
+* 60% Reduced Damage vs ARC Armor
+|-
+|
+'''Research:''' [[Amplified Research#Targeted Component Trial|Targeted Component Trial]]<br />
+'''Materials:''' 2 [[Assessor Matrix]]<br />
+'''Conflicts:''' Ramping Damage
+|}
+{| class="wikitable wikitable--fluid" style="width: 100%; margin-bottom: 0;"
+! style="text-align: left; font-size: 1.1em; font-weight: bold; border-left: 4px solid var(--color-emphasized);" | Bigger Mag
+|-
+| Increases the magazine capacity.
+* +30 Magazine Size
+|-
+|
+'''Materials:''' 3 [[Pressure Regulator]]
+|}
+</div>
+
+</div>

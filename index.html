@@ -395,6 +395,14 @@ const raidToggle = names => { const sk = altSkill(names); return sk ? `<label cl
 const bindRaid = () => { const c = $("#raid"); if (c) c.onchange = () => { opt.raid = c.checked; saveOpt(); renderPanel(); }; };
 
 function init(data) {
+  index(data);
+  $("#stamp").textContent = `dane z wiki: ${data.fetched}`;
+  renderFilters();
+  $("#foot").innerHTML = `Źródło: <a href="${esc(data.source)}" target="_blank" rel="noopener">ARC Raiders Wiki</a> (Cargo: items, crafting, recycling, workshopUpgrades, projectItems, questItems; źródła łupu z sekcji „Sources” stron przedmiotów; amplifikacje ze stron Amplified Weapons i Amplified Research). ${NAMES.length} przedmiotów, ${data.recipes.length} przepisów, ${data.recycle.length} wpisów recyklingu. Pobrano ${esc(data.fetched)}.`;
+  route();
+}
+// Indeksy z data.json, bez dotykania strony (osobno, żeby testy mogły je zbudować bez DOM).
+function index(data) {
   D = data; ITEMS = data.items;
   for (const r of data.recipes) { push(byOut, r.out, r); for (const [n] of r.in) push(byIn, n, r); }
   for (const r of data.recycle) { push(recFrom, r.in, r); for (const [o, q] of r.out) push(recTo, o, { src: r.in, qty: q, type: r.type }); }
@@ -411,10 +419,6 @@ function init(data) {
   LONE = new Set(Object.keys(ITEMS).filter(n => !all.has(n)));
   NAMES = [...all, ...LONE].sort((a, b) => a.localeCompare(b));
   for (const n of NAMES) SLUG.set(slug(n), n);
-  $("#stamp").textContent = `dane z wiki: ${data.fetched}`;
-  renderFilters();
-  $("#foot").innerHTML = `Źródło: <a href="${esc(data.source)}" target="_blank" rel="noopener">ARC Raiders Wiki</a> (Cargo: items, crafting, recycling, workshopUpgrades, projectItems, questItems; źródła łupu z sekcji „Sources” stron przedmiotów; amplifikacje ze stron Amplified Weapons i Amplified Research). ${NAMES.length} przedmiotów, ${data.recipes.length} przepisów, ${data.recycle.length} wpisów recyklingu. Pobrano ${esc(data.fetched)}.`;
-  route();
 }
 
 /* ---------- category filters ---------- */
@@ -1363,7 +1367,7 @@ function calcRun() {
     const own = Math.min(have[n] || 0, q), rest = q - own;
     const r = rec(n);
     if (!r) { raw.push({ n, need: q, own, rest }); continue; }
-    const k = Math.ceil(rest / r.qty - 1e-9);
+    const k = Math.max(0, Math.ceil(rest / r.qty - 1e-9)); // max: bez -0, gdy zapas pokrywa całość
     crafts.push({ n, need: q, own, rest, k, made: k * r.qty, r, lvl: lvl.get(n) || 0 });
     for (const [m, c] of r.in) {
       need.set(m, (need.get(m) || 0) + k * c);
@@ -1559,6 +1563,9 @@ document.addEventListener("click", e => { if (!box.contains(e.target)) sugg.hidd
 document.addEventListener("keydown", e => {
   if (e.key === "/" && document.activeElement.tagName !== "INPUT") { e.preventDefault(); q.focus(); }
 });
+
+// Haczyk dla tests/calc.test.mjs (na stronie nic nie robi).
+if (typeof globalThis.__arcTest === "function") globalThis.__arcTest({ index, calcRun, bestRecycle, CALC, opt, hidden });
 
 fetch("data.json").then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }).then(init).catch(err => {
   $("#stamp").textContent = "brak danych";
